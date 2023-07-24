@@ -1,0 +1,44 @@
+<!--<h2>List of Patterns</h2>-->
+
+<!--<p>Coming soon: Drag and Drop a pattern on to the main map</p>-->
+<!--<div>-->
+<!--    <p>Available types are</p>-->
+<!--    <ul>-->
+<!--        <li>Still Lifes</li>-->
+<!--        <li>Oscillators</li>-->
+<!--        <li>Spaceships (moving patterns)</li>-->
+<!--        <li>tba. Cannons (generate Spaceships)</li>-->
+<!--    </ul>-->
+<!--</div>-->
+
+
+<div class="map-list">
+    <div class="pattern" *ngFor="let config of allConfigs" (click)="selectConfig(config)">
+        <h3>{{config.id | mapName}} @fps: {{config.fps}}</h3>
+        <p *ngIf="config.description">{{config.description}}</p>
+        <app-cgol-map
+                [mapConfig]="config"
+                [isPaused]="config.fps === 0"
+        ></app-cgol-map>
+    </div>
+</div>
+
+<p><b>Selected Config: {{selectedConfig?.id || '-' | mapName}} </b></p>
+
+<div *ngIf="selectedConfig">
+    <p>
+        The selected pattern will be added to the map at the selected coordinates.
+        <br>
+        Reference Point is the top left corner.
+    </p>
+    <div>
+        <label for="enter-coord-x">Enter X Coordinate</label>
+        <input id="enter-coord-x" type="number" [(ngModel)]="coordX" min="0">
+    </div>
+
+    <div>
+        <label for="enter-coord-y">Enter Y Coordinate</label>
+        <input id="enter-coord-y" type="number" [(ngModel)]="coordY" min="0">
+    </div>
+    <button (click)="addToMap()">Add to Map</button>
+</div>

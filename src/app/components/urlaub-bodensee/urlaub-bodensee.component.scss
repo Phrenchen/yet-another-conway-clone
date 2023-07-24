@@ -1,0 +1,33 @@
+img {
+  max-width: 60vw;
+  max-height: 30vh;
+  width: auto;
+  height: auto;
+  aspect-ratio: 16 / 9; // TODO: works for landscape only
+
+  cursor: pointer;
+
+
+  border-radius: .6rem;
+  border: 2px solid black;
+}
+
+.selected-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+
+
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 100%;
+}
+
+.day {
+  .day-images {
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+  }
+}

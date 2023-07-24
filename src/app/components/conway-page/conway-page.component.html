@@ -1,0 +1,32 @@
+<app-header
+        [mainMapId]="gameConfig.mapConfig.id"
+        (startNewRandomGame)="startNewRandomGame()"
+        (startNewEmptyGame)="startNewEmptyGame()"
+        (pauseChange)="updateMainMapPause($event)"
+        (loadLastGame)="loadLastGame()"
+        (loadSelectedGame)="loadSelectedGame($event)"
+        (saveMap)="saveMap()"
+        (deleteMap)="deleteMap($event)"
+        [hasSavedMap]="hasSavedGame"
+        [allGames]="allGames"
+></app-header>
+
+<div class="main-content">
+    <div *ngIf="cgol.showPatternList$ | async" class="map-list">
+        <app-pattern-list
+                [allPatterns]="allPatterns"
+                [allPaused]="true"
+                (configSelected)="selectedConfigToAddToMap($event)"
+        ></app-pattern-list>
+    </div>
+    <div class="main-map">
+        <h2>Main Map ({{gameConfig.mapConfig | mapSize }}) @fps: {{gameConfig.mapConfig.fps}}</h2>
+        <p>living cell count (gameConfig): {{gameConfig.mapConfig.livingCellCount || '-'}}</p>
+        <app-cgol-map #mainMap
+                      [mapConfig]="gameConfig.mapConfig"
+                      [useAvailableSpace]="true"
+                      [isPaused]="isMainMapPaused"
+                      (nextGeneration)="nextGenerationMainMap($event)"
+        ></app-cgol-map>
+    </div>
+</div>

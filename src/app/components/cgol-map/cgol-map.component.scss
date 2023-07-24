@@ -1,0 +1,14 @@
+.map-container {
+  //margin: 1rem;
+
+  canvas {
+    height: 100%;
+    width: 100%;
+    border: 1px solid black;
+    background-color: grey;
+  }
+
+  .full-width-map {
+    width: 100%;
+  }
+}

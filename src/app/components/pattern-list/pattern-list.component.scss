@@ -1,0 +1,16 @@
+.map-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr) );
+  width: 100%;
+  overflow-y: auto;
+
+  .pattern {
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .pattern:hover{
+    font-weight: bold;
+    border: 2px solid black;
+  }
+}
