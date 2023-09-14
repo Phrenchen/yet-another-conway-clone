@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, Subject} from "rxjs";
+import {BehaviorSubject, Observable, of, Subject} from "rxjs";
 import {MapConfig} from "../interfaces/map-config";
 import {v4 as uuidv4} from 'uuid';
 import {GenerationInfo} from "../interfaces/generation-info";
@@ -18,7 +18,21 @@ export class CgolService {
     private nextGeneration$$: Subject<GenerationInfo> = new Subject<GenerationInfo>();
     public nextGeneration$: Observable<GenerationInfo> = this.nextGeneration$$.asObservable();
 
+    private worker?: Worker;
+    private multipleMap$$: Subject<MapConfig[]> = new Subject<MapConfig[]>();
+
     constructor() {
+        if (typeof Worker !== 'undefined') {
+            // Create a new
+            this.worker = new Worker(new URL('./cgol.worker', import.meta.url));
+            // this.worker.onmessage = ({data}) => {
+            //     console.log(`page got message: ${data}`);
+            // };
+            // this.worker.postMessage('hello');
+        } else {
+            // Web Workers are not supported in this environment.
+            // You should add a fallback so that your program still executes correctly.
+        }
     }
 
     // public togglePatternList(): void {
@@ -127,10 +141,29 @@ export class CgolService {
     }
 
     public showNextGeneration(config: MapConfig): MapConfig {
-        return this.calculateGenerations(config, 1);
+        return this.calculateGenerations(config);
     }
 
-    private calculateGenerations(config: MapConfig, generationCount: number): MapConfig {
+    public calculateMultipleGenerations(config: MapConfig, generationCount: number): Observable<MapConfig[]> {
+        if (this.worker) {
+            this.worker.postMessage({
+                initialMap: config,
+                generationCount
+            });
+
+            this.worker.onmessage = ({data}) => {
+                console.log(`page got message: ${data}`);
+                this.multipleMap$$.next(data);
+            };
+
+            return this.multipleMap$$.asObservable();
+        }
+
+        console.log('environment not supporting web workers. mööp. todo!');
+        return of([]);
+    }
+
+    private calculateGenerations(config: MapConfig): MapConfig {
         // const nextGen: MapConfig = JSON.parse(JSON.stringify(config));
         const nextGen: MapConfig = config;
         let isGameOver: boolean = true;

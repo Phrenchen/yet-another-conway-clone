@@ -118,6 +118,7 @@ export class ConwayPageComponent {
   // -----
   public startNewStaticGame(): void {
     this.newGame(this.cgol.startStaticGame());
+
   }
 
   public startNewRandomGame(): void {
@@ -130,5 +131,9 @@ export class ConwayPageComponent {
 
   private newGame(mapConfig: MapConfig): void {
     this.gameConfig = this.gameService.startGame(mapConfig);
+
+    this.cgol.calculateMultipleGenerations(mapConfig, 10).subscribe(res => {
+      console.log('received multiple generations from worker', res);
+    })
   }
 }

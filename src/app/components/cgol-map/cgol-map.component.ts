@@ -38,6 +38,9 @@ export class CgolMapComponent implements OnInit, AfterViewInit, OnChanges {
     }
 
     ngOnInit(): void {
+
+
+
         const frameDuration: number = 1000 / this.mapConfig.fps;
         interval(frameDuration)
             .pipe(
