@@ -1,0 +1,8 @@
+<p *ngIf="calculationInProgress; else idle">
+    calculation next generations... <br>
+    {{progressPercent}}% complete
+</p>
+
+<ng-template #idle>
+    idle
+</ng-template>
