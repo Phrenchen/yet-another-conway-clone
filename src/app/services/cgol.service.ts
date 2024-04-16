@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, Subject} from "rxjs";
+import {BehaviorSubject, Observable, of, Subject} from "rxjs";
 import {MapConfig} from "../interfaces/map-config";
 import {v4 as uuidv4} from 'uuid';
 import {GenerationInfo} from "../interfaces/generation-info";
 import {GameConfig} from "../interfaces/game-config";
 import {PositionedConfig} from "../interfaces/positioned-config";
+import {CgolWorkerMessage} from "../interfaces/cgol-worker-message";
 
 
 @Injectable({
@@ -18,7 +19,23 @@ export class CgolService {
     private nextGeneration$$: Subject<GenerationInfo> = new Subject<GenerationInfo>();
     public nextGeneration$: Observable<GenerationInfo> = this.nextGeneration$$.asObservable();
 
+    private worker?: Worker;
+    private multipleMap$$: Subject<CgolWorkerMessage> = new Subject<CgolWorkerMessage>();
+
+
+
     constructor() {
+        if (typeof Worker !== 'undefined') {
+            // Create a new
+            this.worker = new Worker(new URL('./cgol.worker', import.meta.url));
+            this.worker.onmessage = ({data}) => {
+                console.log('page got message:', data);
+            };
+            this.worker.postMessage('hello');
+        } else {
+            // Web Workers are not supported in this environment.
+            // You should add a fallback so that your program still executes correctly.
+        }
     }
 
     // public togglePatternList(): void {
@@ -127,10 +144,50 @@ export class CgolService {
     }
 
     public showNextGeneration(config: MapConfig): MapConfig {
-        return this.calculateGenerations(config, 1);
+        return this.calculateGenerations(config);
     }
 
-    private calculateGenerations(config: MapConfig, generationCount: number): MapConfig {
+    public calculateMultipleGenerations(config: MapConfig, generationCount: number): Observable<CgolWorkerMessage> {
+        if (this.worker) {
+            this.worker.postMessage({
+                initialMap: config,
+                chunkSize: 5,
+                generationCount,
+            });
+
+            let currentGenerationCount = 0;
+            let completed = false;
+
+            this.worker.onmessage = ({data}) => {
+                // console.log(`cgol service got message: ${data}`, data);
+                if (data.result && data.result.length > 0) {
+                    currentGenerationCount += data.result.length;
+                }
+
+                completed = currentGenerationCount === generationCount;
+                const workerMessage: CgolWorkerMessage = {
+                    description: data.description,
+                    progress: data.progress,
+                    result: data.result,
+                    completed
+                }
+                this.multipleMap$$.next(workerMessage);
+            };
+
+            return this.multipleMap$$.asObservable();
+        }
+
+        // TODO: calculate generations on main thread...green threading? only calculate next generation?
+        console.error('environment not supporting web workers.');
+        return of({
+            description: 'environment not supporting web workers',
+            progress: 0,
+            result: [],
+            completed: true
+        });
+    }
+
+    private calculateGenerations(config: MapConfig): MapConfig {
         // const nextGen: MapConfig = JSON.parse(JSON.stringify(config));
         const nextGen: MapConfig = config;
         let isGameOver: boolean = true;

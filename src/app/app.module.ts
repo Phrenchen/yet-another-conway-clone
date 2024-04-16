@@ -10,8 +10,9 @@ import {MapNamePipe} from './pipes/map-name.pipe';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MapSizePipe} from './pipes/map-size.pipe';
 import {InstructionsComponent} from './components/instructions/instructions.component';
-import {UrlaubBodenseeComponent} from './components/urlaub-bodensee/urlaub-bodensee.component';
 import {ConwayPageComponent} from './components/conway-page/conway-page.component';
+// import { CalculateMapProgressComponent } from './components/calculate-map-progress/calculate-map-progress.component';
+// import { WorkerControlComponent } from './components/worker-control/worker-control.component';
 
 @NgModule({
     declarations: [
@@ -22,8 +23,10 @@ import {ConwayPageComponent} from './components/conway-page/conway-page.componen
         MapNamePipe,
         MapSizePipe,
         InstructionsComponent,
-        UrlaubBodenseeComponent,
         ConwayPageComponent,
+        // CalculateMapProgressComponent,
+        // WorkerControlComponent,
+        // TODO: es ist kaputt. versuche den letzten lokalen stand hier einzufügen -> iCloud
     ],
     imports: [
         BrowserModule,

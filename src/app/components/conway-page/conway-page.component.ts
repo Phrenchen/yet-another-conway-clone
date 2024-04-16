@@ -121,7 +121,7 @@ export class ConwayPageComponent {
   }
 
   public startNewRandomGame(): void {
-    this.newGame(this.cgol.createMap(1000, 1000, 'random'));
+    this.newGame(this.cgol.createMap(100, 100, 'random'));
   }
 
   public startNewEmptyGame(): void {

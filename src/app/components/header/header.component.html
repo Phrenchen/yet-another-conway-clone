@@ -1,6 +1,6 @@
 <header>
     <div class="status-bar">
-        <div class="header-buttons">
+        <div class="flex-horizontal">
             <div>
                 <button (click)="newEmptyGame()">New empty game</button>
                 <button (click)="newRandomGame()">New random game</button>
@@ -33,16 +33,17 @@
 
             <a [routerLink]="'instructions'">Instructions</a> <br>
         </div>
-        <div>
+        <div class="flex-horizontal">
+<!--            <app-calculate-map-progress></app-calculate-map-progress>-->
             <div>
                 <input id="toggle-main-map-pause" type="checkbox" [(ngModel)]="togglePaused"
                        (ngModelChange)="pauseChange.emit($event)">
-                <label for="toggle-main-map-pause">{{togglePaused ? 'paused' : 'playing'}}</label>
+                <label for="toggle-main-map-pause">{{togglePaused ? 'play' : 'pause'}}</label>
             </div>
             <!--      <p>is game over? {{cgol.gameOver$$ | async | json}}</p>-->
             <p><b>Generation:</b> {{generationCount$ | async}}</p>
         </div>
-
     </div>
+
 </header>
 

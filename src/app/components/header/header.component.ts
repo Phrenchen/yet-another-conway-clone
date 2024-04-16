@@ -51,6 +51,8 @@ export class HeaderComponent implements OnInit, OnChanges {
         this.selectedSavegameForm.valueChanges.subscribe(change => {
             this.selectedGame = change['saveGame'];
         })
+
+        // this.pauseChange.emit(true);
     }
 
     ngOnChanges(changes: SimpleChanges) {
