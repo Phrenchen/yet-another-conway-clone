@@ -4,7 +4,7 @@ export interface CgolWorkerMessage {
     // messageType: 'result' | 'progress';
     description?: string;
     progress: number;
-    result?: MapConfig[];
+    result: MapConfig[];
     completed: boolean;
 }
 

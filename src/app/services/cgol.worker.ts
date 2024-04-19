@@ -4,6 +4,7 @@
 import {MapConfig} from "../interfaces/map-config";
 import {CgolWorkerMessage, CgolWorkerPayload} from "../interfaces/cgol-worker-message";
 
+
 // addEventListener('message', ({ data }) => {
 addEventListener('message', (payload: CgolWorkerPayload | any) => {
     // console.log('worker is working: omg wtf!!!!', payload);
@@ -17,36 +18,39 @@ addEventListener('message', (payload: CgolWorkerPayload | any) => {
         chunk.push(nextGen);
 
         const nextChunkComplete: boolean = nextMaps.length === payload.data.chunkSize;
-
-        const lastProgressPercent = currentProgressPercent;
         currentProgressPercent = (nextMaps.length / payload.data.generationCount * 100);
 
         const message: CgolWorkerMessage = {
             description: 'current progress',
-            progress: currentProgressPercent,
-            completed: false
+            progress: Math.round(currentProgressPercent),
+            completed: false,
+            result: []
         };
         if (nextChunkComplete) {
             message.result = chunk;
             chunk = [];
         }
 
-        if (currentProgressPercent > lastProgressPercent) {
+        if (currentProgressPercent < 100) {
             postMessage(message);
+        } else {
+            // task completed
+            break;
         }
     }
 
     postMessage({
         description: 'calculation complete',
         progress: 100,
-        completed: true
-        // result: nextMaps
+        completed: true,
+        result: nextMaps
     });
 });
 
+// TODO: re-use function in cgol.service
 const calculateGenerations = (config: MapConfig): MapConfig => {
-    const nextGen: MapConfig = JSON.parse(JSON.stringify(config));
-    // const nextGen: MapConfig = config;
+    // const nextGen: MapConfig = JSON.parse(JSON.stringify(config));
+    const nextGen: MapConfig = config;
     let isGameOver: boolean = true;
     nextGen.livingCellCount = 0;
     nextGen.generationCount += 1;

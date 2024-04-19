@@ -13,6 +13,7 @@ import {CgolWorkerMessage} from "../interfaces/cgol-worker-message";
 })
 export class CgolService {
 
+    // do we need this?
     private showPatternList$$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
     public showPatternList$: Observable<boolean> = this.showPatternList$$.asObservable();
 
@@ -21,7 +22,6 @@ export class CgolService {
 
     private worker?: Worker;
     private multipleMap$$: Subject<CgolWorkerMessage> = new Subject<CgolWorkerMessage>();
-
 
 
     constructor() {
@@ -156,7 +156,6 @@ export class CgolService {
             });
 
             let currentGenerationCount = 0;
-            let completed = false;
 
             this.worker.onmessage = ({data}) => {
                 // console.log(`cgol service got message: ${data}`, data);
@@ -164,13 +163,13 @@ export class CgolService {
                     currentGenerationCount += data.result.length;
                 }
 
-                completed = currentGenerationCount === generationCount;
                 const workerMessage: CgolWorkerMessage = {
                     description: data.description,
                     progress: data.progress,
                     result: data.result,
-                    completed
+                    completed: data.completed
                 }
+
                 this.multipleMap$$.next(workerMessage);
             };
 
@@ -187,6 +186,7 @@ export class CgolService {
         });
     }
 
+    // TODO: re-use function in cgol.worker
     private calculateGenerations(config: MapConfig): MapConfig {
         // const nextGen: MapConfig = JSON.parse(JSON.stringify(config));
         const nextGen: MapConfig = config;

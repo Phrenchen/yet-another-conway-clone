@@ -12,13 +12,37 @@
 ></app-header>
 
 <div class="main-content">
-    <div *ngIf="cgol.showPatternList$ | async" class="map-list">
-        <app-pattern-list
-                [allPatterns]="allPatterns"
-                [allPaused]="true"
-                (configSelected)="selectedConfigToAddToMap($event)"
-        ></app-pattern-list>
+<!-- left side -->
+    <div>
+        <h3>Test Worker</h3>
+        <input type="number" #generationCountInput
+            [defaultValue]="100"
+            min="1"
+               step="5"
+        >
+        <button
+                (click)="calculate(generationCountInput.value)"
+        >
+            Calculate {{generationCountInput.value}} generations
+        </button>
+        <pre>
+        Calculated: {{workerMessage?.progress}}%
+        completed? {{workerMessage?.completed}}
+        last gen has survivors? {{livingCellCount}}
+            </pre>
+
     </div>
+
+
+<!--    <div *ngIf="cgol.showPatternList$ | async" class="map-list">-->
+<!--        <app-pattern-list-->
+<!--                [allPatterns]="allPatterns"-->
+<!--                [allPaused]="true"-->
+<!--                (configSelected)="selectedConfigToAddToMap($event)"-->
+<!--        ></app-pattern-list>-->
+<!--    </div>-->
+
+<!-- right side -->
     <div class="main-map">
         <h2>Main Map ({{gameConfig.mapConfig | mapSize }}) @fps: {{gameConfig.mapConfig.fps}}</h2>
         <p>living cell count (gameConfig): {{gameConfig.mapConfig.livingCellCount || '-'}}</p>
