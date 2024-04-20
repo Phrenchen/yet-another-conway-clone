@@ -24,6 +24,7 @@ export class ConwayPageComponent implements OnInit {
     public isMainMapPaused: boolean = false;
     public hasSavedGame: boolean = false;
     public allGames: GameConfig[] = [];
+    
     public livingCellCount = 0;
 
     public workerMessage?: CgolWorkerMessage;
@@ -129,7 +130,7 @@ export class ConwayPageComponent implements OnInit {
 
         // console.log('calculate:', amount)
         this.cgol.calculateMultipleGenerations(
-            this.cgol.createMap(100, 1500, 'random'),
+            this.cgol.createMap(1000, 1000, 'random'),
             amount
         )
             .pipe(
@@ -139,9 +140,9 @@ export class ConwayPageComponent implements OnInit {
             )
             .subscribe((res: CgolWorkerMessage) => {
                 this.workerMessage = res;
-                const lastGen: MapConfig = res.result[res.result.length];
-                console.log('WTF it happende1!!', res.completed, lastGen.livingCellCount);
-                this.livingCellCount = lastGen.livingCellCount;
+                const lastGen: MapConfig = res.result[res.result.length - 1];
+                console.log('WTF it happende1!!', res.completed, lastGen?.livingCellCount);
+                this.livingCellCount = lastGen?.livingCellCount || -1;
 
                 if (res.completed) {
                   console.log('done', res)

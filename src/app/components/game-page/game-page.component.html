@@ -1,0 +1,47 @@
+<div>
+    <div>
+        <app-cgol-map #mainMap [mapConfig]="mapStartConfig" [useAvailableSpace]="true"
+        [isPaused]="false">
+    </app-cgol-map>
+    </div>
+    <div>
+        <h3>Pre-Calculate Generations</h3>
+        <div>
+            <div>
+                <label for="input-tile-x">Horizontally</label>
+                <input id="input-tile-x" type="number" min="10" max="10000" step="10" [defaultValue]="100" [(ngModel)]="tileCountX">
+            </div>
+            <div>
+                <label for="input-tile-x">Vertically</label>
+                <input id="input-tile-y" type="number" min="10" max="10000" step="10" [defaultValue]="100" [(ngModel)]="tileCountY">
+            </div>
+        </div>
+
+
+        <div>
+            <label for="input-gen-count">How many generations?</label>
+            <input #generationCountInput id="input-gen-count"
+                type="number"  [defaultValue]="100" min="1" step="5"
+            >
+        </div>    
+
+        <button (click)="calculate(generationCountInput.value)">
+            Calculate
+        </button>
+        
+
+        <pre>
+            Calculated: {{workerMessage?.progress}}% of {{'test'}}    
+            Has completed: {{ workerMessage?.completed }}
+            Map Size: {{ tileCountX }} x {{ tileCountY }} ({{ (tileCountX * tileCountY) | number}}) Tiles
+            Last gen survivors count: {{ livingCellCount | number}}
+           
+        </pre>
+    </div>
+
+    <div>
+        <app-cgol-map #mainMap [mapConfig]="mapConfig" [useAvailableSpace]="true"
+            [isPaused]="false">
+        </app-cgol-map>
+    </div>
+</div>

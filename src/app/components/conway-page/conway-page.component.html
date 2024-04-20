@@ -12,17 +12,11 @@
 ></app-header>
 
 <div class="main-content">
-<!-- left side -->
+    <!-- left side -->
     <div>
         <h3>Test Worker</h3>
-        <input type="number" #generationCountInput
-            [defaultValue]="100"
-            min="1"
-               step="5"
-        >
-        <button
-                (click)="calculate(generationCountInput.value)"
-        >
+        <input type="number" #generationCountInput [defaultValue]="100" min="1" step="5">
+        <button (click)="calculate(generationCountInput.value)">
             Calculate {{generationCountInput.value}} generations
         </button>
         <pre>
@@ -34,23 +28,19 @@
     </div>
 
 
-<!--    <div *ngIf="cgol.showPatternList$ | async" class="map-list">-->
-<!--        <app-pattern-list-->
-<!--                [allPatterns]="allPatterns"-->
-<!--                [allPaused]="true"-->
-<!--                (configSelected)="selectedConfigToAddToMap($event)"-->
-<!--        ></app-pattern-list>-->
-<!--    </div>-->
+    <!--    <div *ngIf="cgol.showPatternList$ | async" class="map-list">-->
+    <!--        <app-pattern-list-->
+    <!--                [allPatterns]="allPatterns"-->
+    <!--                [allPaused]="true"-->
+    <!--                (configSelected)="selectedConfigToAddToMap($event)"-->
+    <!--        ></app-pattern-list>-->
+    <!--    </div>-->
 
-<!-- right side -->
+    <!-- right side -->
     <div class="main-map">
         <h2>Main Map ({{gameConfig.mapConfig | mapSize }}) @fps: {{gameConfig.mapConfig.fps}}</h2>
         <p>living cell count (gameConfig): {{gameConfig.mapConfig.livingCellCount || '-'}}</p>
-        <app-cgol-map #mainMap
-                      [mapConfig]="gameConfig.mapConfig"
-                      [useAvailableSpace]="true"
-                      [isPaused]="isMainMapPaused"
-                      (nextGeneration)="nextGenerationMainMap($event)"
-        ></app-cgol-map>
+        <app-cgol-map #mainMap [mapConfig]="gameConfig.mapConfig" [useAvailableSpace]="true"
+            [isPaused]="isMainMapPaused" (nextGeneration)="nextGenerationMainMap($event)"></app-cgol-map>
     </div>
 </div>

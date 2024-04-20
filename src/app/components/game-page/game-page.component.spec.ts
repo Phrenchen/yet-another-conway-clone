@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UrlaubBodenseeComponent } from './urlaub-bodensee.component';
+import { GamePageComponent } from './game-page.component';
 
-describe('UrlaubBodenseeComponent', () => {
-  let component: UrlaubBodenseeComponent;
-  let fixture: ComponentFixture<UrlaubBodenseeComponent>;
+describe('GamePageComponent', () => {
+  let component: GamePageComponent;
+  let fixture: ComponentFixture<GamePageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ UrlaubBodenseeComponent ]
+      declarations: [ GamePageComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(UrlaubBodenseeComponent);
+    fixture = TestBed.createComponent(GamePageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

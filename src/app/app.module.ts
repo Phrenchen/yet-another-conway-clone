@@ -11,6 +11,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MapSizePipe} from './pipes/map-size.pipe';
 import {InstructionsComponent} from './components/instructions/instructions.component';
 import {ConwayPageComponent} from './components/conway-page/conway-page.component';
+import { GamePageComponent } from './components/game-page/game-page.component';
 // import { CalculateMapProgressComponent } from './components/calculate-map-progress/calculate-map-progress.component';
 // import { WorkerControlComponent } from './components/worker-control/worker-control.component';
 
@@ -24,6 +25,7 @@ import {ConwayPageComponent} from './components/conway-page/conway-page.componen
         MapSizePipe,
         InstructionsComponent,
         ConwayPageComponent,
+        GamePageComponent,
         // CalculateMapProgressComponent,
         // WorkerControlComponent,
         // TODO: es ist kaputt. versuche den letzten lokalen stand hier einzufügen -> iCloud
