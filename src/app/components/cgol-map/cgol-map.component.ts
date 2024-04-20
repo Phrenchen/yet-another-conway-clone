@@ -25,7 +25,7 @@ export class CgolMapComponent implements OnInit, AfterViewInit, OnChanges {
 
     @Input() mapConfig!: MapConfig;
     @Input() useAvailableSpace: boolean = true;
-    // @Input() fps: number = 1;
+    @Input() fps: number = -1;
     @Input() isPaused: boolean = false;
 
     @Output() nextGeneration: EventEmitter<MapConfig> = new EventEmitter<MapConfig>();
@@ -38,10 +38,9 @@ export class CgolMapComponent implements OnInit, AfterViewInit, OnChanges {
     }
 
     ngOnInit(): void {
+        const useFPS:number = this.fps !== -1 ? this.fps : this.mapConfig.fps;
 
-
-
-        const frameDuration: number = 1000 / this.mapConfig.fps;
+        const frameDuration: number = 1000 / useFPS;
         interval(frameDuration)
             .pipe(
                 filter(() => {

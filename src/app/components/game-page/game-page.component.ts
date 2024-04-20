@@ -28,7 +28,7 @@ export class GamePageComponent {
     const amount = parseInt(amountStr);
     const destroy$$: Subject<void> = new Subject<void>();
 
-    this.mapStartConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'random');
+    this.mapStartConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'random', 15);
 
     this.cgol.calculateMultipleGenerations(
         this.mapStartConfig,
@@ -47,7 +47,7 @@ export class GamePageComponent {
 
             if (res.completed) {
               console.log('done', res)
-              this.mapConfig = res.result[0];
+              this.mapConfig = res.result[res.result.length - 1];
 
               destroy$$.next();
             }

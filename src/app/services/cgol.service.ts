@@ -74,10 +74,10 @@ export class CgolService {
         return clonedTargetMap;
     }
 
-    public createMap(columns: number, rows: number, preset: 'random' | 'empty'): MapConfig {
+    public createMap(columns: number, rows: number, preset: 'random' | 'empty', fps: number = 15): MapConfig {
         const config: MapConfig = this.createEmptyGame();
         config.cells = this.createCells(columns, rows, preset);
-        config.fps = 15;
+        config.fps = fps;
         return config;
     }
 

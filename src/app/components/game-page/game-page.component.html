@@ -1,8 +1,17 @@
 <div>
     <div>
-        <app-cgol-map #mainMap [mapConfig]="mapStartConfig" [useAvailableSpace]="true"
-        [isPaused]="false">
-    </app-cgol-map>
+        <div>
+            <b>Start Config</b>
+            <app-cgol-map #mainMap [mapConfig]="mapStartConfig" [useAvailableSpace]="true"
+                [isPaused]="true">
+            </app-cgol-map>
+        </div>
+        <div>
+            <b>Running</b>
+            <app-cgol-map #mainMap [mapConfig]="mapStartConfig" [fps]="5" [useAvailableSpace]="true"
+                [isPaused]="false">
+            </app-cgol-map>
+        </div>
     </div>
     <div>
         <h3>Pre-Calculate Generations</h3>
@@ -40,8 +49,9 @@
     </div>
 
     <div>
+        <b>Result</b>
         <app-cgol-map #mainMap [mapConfig]="mapConfig" [useAvailableSpace]="true"
-            [isPaused]="false">
+            [isPaused]="true">
         </app-cgol-map>
     </div>
 </div>
