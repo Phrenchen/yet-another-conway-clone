@@ -12,6 +12,7 @@ import {MapSizePipe} from './pipes/map-size.pipe';
 import {InstructionsComponent} from './components/instructions/instructions.component';
 import {ConwayPageComponent} from './components/conway-page/conway-page.component';
 import { GamePageComponent } from './components/game-page/game-page.component';
+import { ThreeDeeBackgroundComponent } from './components/three-dee-background/three-dee-background.component';
 // import { CalculateMapProgressComponent } from './components/calculate-map-progress/calculate-map-progress.component';
 // import { WorkerControlComponent } from './components/worker-control/worker-control.component';
 
@@ -26,6 +27,7 @@ import { GamePageComponent } from './components/game-page/game-page.component';
         InstructionsComponent,
         ConwayPageComponent,
         GamePageComponent,
+        ThreeDeeBackgroundComponent,
         // CalculateMapProgressComponent,
         // WorkerControlComponent,
         // TODO: es ist kaputt. versuche den letzten lokalen stand hier einzufügen -> iCloud
