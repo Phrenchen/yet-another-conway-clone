@@ -1,4 +1,7 @@
 import {Component, OnInit} from '@angular/core';
+import { SceneConfig } from 'src/app/interfaces/scene-config';
+import { ThreejsFactoryService } from 'src/app/services/threejs-factory.service';
+import { ThreejsSceneService } from 'src/app/services/threejs-scene.service';
 
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
@@ -10,55 +13,61 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
   styleUrls: ['./three-dee-background.component.scss']
 })
 export class ThreeDeeBackgroundComponent implements OnInit{
+
+  private sceneConfig!: SceneConfig;
+
+  constructor(
+    private threeJsFactoryService: ThreejsFactoryService,
+    private threeJsSceneService: ThreejsSceneService
+  ) {}
+
   ngOnInit(): void {
-    const scene: THREE.Scene = new THREE.Scene();
-    const camera: THREE.Camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer: THREE.Renderer = new THREE.WebGLRenderer({
-      canvas: document.querySelector('#bg') as HTMLCanvasElement,
-    })
-// renderer.setPixelratio(window.devicePixelRatio)
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.position.setZ(30);
-    renderer.render(scene, camera);
+    this.sceneConfig  = this.threeJsSceneService.createScene(document.querySelector('#bg') as HTMLCanvasElement);
 
-//
-    const geometry: THREE.TorusGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
-    const material: THREE.MeshStandardMaterial = new THREE.MeshStandardMaterial({
-      color: 0xFF6347
-    });
-    const torus: THREE.Mesh = new THREE.Mesh(geometry, material);
-    scene.add(torus);
+    const rows = 5;
+    const columns = 15;
+    const lineGap = 5;
+  
+    for(let i=0; i<rows; i++) {
+      const lineOfBoxes: THREE.Mesh[] = this.threeJsFactoryService.createLineOfBoxes(columns, new THREE.Vector3(5, 0, 0));
+
+      lineOfBoxes.forEach(box => {
+        box.position.y = i * lineGap;
+        this.sceneConfig.scene.add(box);
+      });
+  
+    }
 
 
-    const pointLight = new THREE.PointLight(0xffffff);
-    pointLight.position.set(20, 20,20 );
-    const ambientLight = new THREE.AmbientLight(0xffffff);
-    scene.add(pointLight, ambientLight);
+    // const box: THREE.Mesh = this.threeJsFactoryService.createBox();
+    // this.sceneConfig.scene.add(box);
 
-    const lightHelper = new THREE.PointLightHelper(pointLight);
-    scene.add(lightHelper);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const lightHelper = this.threeJsFactoryService.createPointLight(this.sceneConfig.scene);
+    this.sceneConfig.scene.add(lightHelper);
+    
+    const controls = new OrbitControls(this.sceneConfig.camera, this.sceneConfig.renderer.domElement);
+
 
 
 
 
 
 // game loop ++++++++++++
-    function animate() {
+    const animate = () => {
       requestAnimationFrame(animate);
 
       // torus.rotation.x += 0.01;
-      torus.rotation.y += 0.005;
+      // torus.rotation.y += 0.005;
       // torus.rotation.z += 0.01;
       // torus.position.setX(torus.position.x + 0.05);
       // torus.position.setY(torus.position.y + 0.05);
-      torus.position.setZ(torus.position.z - 0.03);
+      // torus.position.setZ(torus.position.z - 0.03);
 
 
       controls.update();
 
-      renderer.render(scene, camera);
+      this.sceneConfig.renderer.render(this.sceneConfig.scene, this.sceneConfig.camera);
     }
     animate();
 

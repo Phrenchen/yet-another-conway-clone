@@ -4,6 +4,7 @@ canvas {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: greenyellow;
-  z-index: -1;
+  background-color: transparent;
+  
+  z-index: 999;
 }
