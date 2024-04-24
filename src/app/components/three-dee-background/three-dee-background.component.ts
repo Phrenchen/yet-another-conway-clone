@@ -20,6 +20,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
   @Input() mapConfig!: MapConfig;
 
   private sceneConfig!: SceneConfig;
+
   private allBoxes: Array<THREE.Mesh[]> = [];
   private allBoxesCopy: Array<THREE.Mesh[]> = this.allBoxes;
 
@@ -37,27 +38,27 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
     this.sceneConfig  = this.threeJsSceneService.createScene(document.querySelector('#bg') as HTMLCanvasElement);
 
 
-    const rows: number = this.mapConfig.cells.length;
-    const columns: number = this.mapConfig.cells[0].length;
-    const size: number = 1;
-    const gap: number = size;
-    const boxSize: number = .9;
-    let lineOfBoxes: THREE.Mesh[];
+  //   const rows: number = this.mapConfig.cells.length;
+  //   const columns: number = this.mapConfig.cells[0].length;
+  //   const size: number = 1;
+  //   const gap: number = size;
+  //   const boxSize: number = .9;
+  //   let lineOfBoxes: THREE.Mesh[];
 
-    for(let i=0; i<rows; i++) {
-      lineOfBoxes = this.threeJsFactoryService.createGrid(
-        'box', 
-        columns, 
-        new THREE.Vector3(boxSize, boxSize, boxSize),
-        new THREE.Vector3(0, 0, gap)
-    );
+  //   for(let i=0; i<rows; i++) {
+  //     lineOfBoxes = this.threeJsFactoryService.createGrid(
+  //       'box', 
+  //       columns, 
+  //       new THREE.Vector3(boxSize, boxSize, boxSize),
+  //       new THREE.Vector3(0, 0, gap)
+  //   );
 
-    this.allBoxes = [...this.allBoxes, lineOfBoxes];
-    lineOfBoxes.forEach(box => {
-      box.position.setX(i * gap);
-      this.sceneConfig.scene.add(box);
-    });
-  }
+  //   this.allBoxes = [...this.allBoxes, lineOfBoxes];
+  //   lineOfBoxes.forEach(box => {
+  //     box.position.setX(i * gap);
+  //     this.sceneConfig.scene.add(box);
+  //   });
+  // }
 
     this.allBoxesCopy = [...this.allBoxes]; // todo: avoid cloning large array
 
@@ -66,7 +67,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
     
     this.controls = new OrbitControls(this.sceneConfig.camera, this.sceneConfig.renderer.domElement);
   
-    this.startGame();
+    // this.startGame();
     
 
 
@@ -94,23 +95,73 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
 
   ngOnChanges(changes: SimpleChanges): void {
     this.destroy$$.next();
+
+    console.log('start new game?');
+    
     this.startGame();
     // this.updateMaterials();
   }
 
   private startGame(): void {
-    const gameTickDelay = 1000; // 1000 == 1fps / second
+    console.log('starting new game');
     
-    this.cgol.playGame(this.mapConfig, gameTickDelay)
-      .pipe(
-        takeUntil(this.destroy$$),
-      )
-      .subscribe(nextGen => {
-        // console.log('game tick:', nextGen);
-
-        this.mapConfig = nextGen;
-        this.updateMaterials(nextGen);
+    // dispose old game
+    if(this.allBoxes.length > 0) {
+      this.allBoxes.forEach(row => {
+        row.forEach(box => {
+          this.sceneConfig.scene.remove(box);
+        });
       });
+
+      this.allBoxes = [];
+      console.log('disposed old game.');
+    }
+
+    setTimeout(() => {
+      this.createBoxes();
+
+      const gameTickDelay = 1000; // 1000 == 1fps / second
+      
+      this.cgol.playGame(this.mapConfig, gameTickDelay)
+        .pipe(
+          takeUntil(this.destroy$$),
+        )
+        .subscribe(nextGen => {
+          // console.log('game tick:', nextGen);
+
+          this.mapConfig = nextGen;
+          this.updateMaterials(nextGen);
+        });
+
+
+        this.updateMaterials(this.mapConfig);
+
+      }, 1000
+    );
+  }
+
+  private createBoxes(): void {
+    const rows: number = this.mapConfig.cells.length;
+    const columns: number = this.mapConfig.cells[0].length;
+    const size: number = 1;
+    const gap: number = size;
+    const boxSize: number = .9;
+    let lineOfBoxes: THREE.Mesh[];
+
+    for(let i=0; i<rows; i++) {
+      lineOfBoxes = this.threeJsFactoryService.createGrid(
+        'box', 
+        columns, 
+        new THREE.Vector3(boxSize, boxSize, boxSize),
+        new THREE.Vector3(0, 0, gap)
+      );
+
+      this.allBoxes = [...this.allBoxes, lineOfBoxes];
+      lineOfBoxes.forEach(box => {
+        box.position.setX(i * gap);
+        this.sceneConfig.scene.add(box);
+      });
+    }
   }
 
   private updateMaterials(mapConfig: MapConfig): void {
