@@ -42,14 +42,16 @@
         <pre>
             Calculated: {{workerMessage?.progress}}% of {{'test'}}    
             Has completed: {{ workerMessage?.completed }}
-            Map Size: {{ tileCountX }} x {{ tileCountY }} ({{ (tileCountX * tileCountY) | number}}) Tiles
+            Map Size: {{ tileCountX }} x {{ tileCountY }} ({{ (tileCountX * tileCountY) | number}} Tiles)
             Last gen survivors count: {{ livingCellCount | number}}
            
         </pre>
     </div>
 
     <div>
-<app-three-dee-background></app-three-dee-background>
+<app-three-dee-background
+[mapConfig]="mapStartConfig"
+></app-three-dee-background>
 
         <!-- <b>Result</b>
         <app-cgol-map #mainMap [mapConfig]="mapConfig" [useAvailableSpace]="true"

@@ -14,11 +14,13 @@ export class GamePageComponent {
   public workerMessage?: CgolWorkerMessage;
   public livingCellCount = 0;
 
-  public tileCountX = 15;
-  public tileCountY = 5; 
+  public tileCountX = 10;
+  public tileCountY = 10; 
 
 
   public mapStartConfig: MapConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'random');
+  // public mapStartConfig: MapConfig = this.cgol.createFlipper();
+
   public mapConfig: MapConfig = {...this.mapStartConfig};
 
   constructor(private cgol: CgolService) {}
@@ -28,7 +30,7 @@ export class GamePageComponent {
     const amount = parseInt(amountStr);
     const destroy$$: Subject<void> = new Subject<void>();
 
-    this.mapStartConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'random', 15);
+    this.mapStartConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'random', 100);
 
     this.cgol.calculateMultipleGenerations(
         this.mapStartConfig,

@@ -5,7 +5,7 @@ export interface MapConfig {
 
   cellWidth: number;
   cellHeight: number;
-  cells: number[][];
+  cells: number[][];        // 0 = dead, 1 = alive
 
   livingCellCount: number;
   generationCount: number;

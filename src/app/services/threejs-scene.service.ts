@@ -17,8 +17,14 @@ export class ThreejsSceneService {
       canvas
     })
 
+
+    const gridHelper = new THREE.GridHelper(100, 100);
+    scene.add(gridHelper);
+
     renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.position.setZ(30);
+    camera.position.setX(0);
+    camera.position.setY(20);
+    camera.position.setZ(0);
     renderer.render(scene, camera);
 
     return {

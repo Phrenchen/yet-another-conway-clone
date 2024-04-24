@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as THREE from 'three';
 import { MathHelperService } from './math-helper.service';
+import { MapConfig } from '../interfaces/map-config';
 
 @Injectable({
   providedIn: 'root'
@@ -9,17 +10,39 @@ export class ThreejsFactoryService {
 
   constructor(private mathHelper: MathHelperService) { }
 
-  public createLineOfBoxes(amount: number, gap: THREE.Vector3 = new THREE.Vector3(10, 10, 10), randomRotation: boolean = true): THREE.Mesh[] {
+  public createGridByConfig(mapConfig: MapConfig): THREE.Mesh[] {
+    return [];
+  }
+
+  public createGrid(type: 'box' | 'sphere' | 'torus', 
+    amount: number, 
+    size: THREE.Vector3 = new THREE.Vector3(1, 1, 1), 
+    position: THREE.Vector3 = new THREE.Vector3(1, 0, 1), 
+    randomRotation: boolean = false,
+
+  ): THREE.Mesh[] {
     const boxes: THREE.Mesh[] = [];
 
     while(boxes.length < amount) {
-      const box: THREE.Mesh = this.createBox();
+      let box: THREE.Mesh;
 
-      if(randomRotation) {
-        box.position.x = gap.x * boxes.length;
-        box.position.y = gap.y * boxes.length;
-        box.position.z = gap.z * boxes.length;
+      switch(type) {
+        case 'box':
+          box = this.createBox(size);
+          break;
+        case 'sphere':
+          box = this.createSphere();
+          break;
+        case 'torus':
+        default:
+          box = this.createTorus();
+      }
 
+      box.position.x = position.x * boxes.length;
+      box.position.y = position.y * boxes.length;
+      box.position.z = position.z * boxes.length;
+
+      if (randomRotation) {
         box.rotation.x = this.mathHelper.getRandomInt(0, 359);
         box.rotation.y = this.mathHelper.getRandomInt(0, 359);
         box.rotation.y = this.mathHelper.getRandomInt(0, 359);
@@ -32,7 +55,7 @@ export class ThreejsFactoryService {
   
   public createBox(size: THREE.Vector3 = new THREE.Vector3(1, 1, 1)): THREE.Mesh {
     const geometry: THREE.BoxGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
-      const material: THREE.MeshStandardMaterial = this.createMaterial(Math.random() < .5);
+    const material: THREE.MeshStandardMaterial = this.createMaterial(false);
     const sphere: THREE.Mesh = new THREE.Mesh(geometry, material);
     return sphere;
   }
@@ -75,6 +98,14 @@ export class ThreejsFactoryService {
     
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(pointLight, ambientLight);
+
+
+    const light = new THREE.DirectionalLight( 0xffffff, 3 );
+    light.position.set( 0.5, 0.5, 1 );
+    light.castShadow = true;
+    light.shadow.camera.zoom = 4; // tighter shadow map
+    scene.add( light );
+
 
     const lightHelper = new THREE.PointLightHelper(pointLight);
     // scene.add(lightHelper);

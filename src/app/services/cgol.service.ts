@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, of, Subject} from "rxjs";
+import {BehaviorSubject, interval, map, Observable, of, Subject, switchMap} from "rxjs";
 import {MapConfig} from "../interfaces/map-config";
 import {v4 as uuidv4} from 'uuid';
 import {GenerationInfo} from "../interfaces/generation-info";
@@ -42,6 +42,21 @@ export class CgolService {
     //     this.showPatternList$$.next(!this.showPatternList$$.value);
     // }
 
+    public playGame(mapConfig: MapConfig, delay: number = 1000): Observable<MapConfig> {
+        return of(mapConfig)
+        .pipe(
+            switchMap(() => {
+                return interval(delay);
+            }),
+            map(tick => {
+                // calculate next gen
+                mapConfig = this.calculateNextGeneration(mapConfig)
+                return mapConfig;
+            })
+        );
+    }
+
+
     public mergeMaps(targetMap: number[][], pattern: PositionedConfig): number[][] {
         if (pattern.x < 0 || pattern.y < 0) return [];
 
@@ -74,7 +89,7 @@ export class CgolService {
         return clonedTargetMap;
     }
 
-    public createMap(columns: number, rows: number, preset: 'random' | 'empty', fps: number = 15): MapConfig {
+    public createMap(columns: number, rows: number, preset: 'random' | 'empty' | 'flipper', fps: number = 15): MapConfig {
         const config: MapConfig = this.createEmptyGame();
         config.cells = this.createCells(columns, rows, preset);
         config.fps = fps;
@@ -108,6 +123,31 @@ export class CgolService {
         return gameConfig;
     }
 
+    public createFlipper(): MapConfig {
+        const map: MapConfig = {
+            id: uuidv4(),
+            name: null,
+            description: null,
+            cellWidth: 10,
+            cellHeight: 10,
+            cells: [],
+            livingCellCount: 0,
+            generationCount: 0,
+            isGameOver: false,
+            fps: 1
+        };
+
+        map.cells = [
+            [0,0,0,0,0],
+            [0,0,1,0,0],
+            [0,0,1,0,0],
+            [0,0,1,0,0],
+            [0,0,0,0,0],
+        ];
+
+        return map;
+    }
+
 
     private createEmptyGame(): MapConfig {
         return {
@@ -124,7 +164,7 @@ export class CgolService {
         };
     }
 
-    private createCells(columns: number, rows: number, preset: 'random' | 'empty'): number[][] {
+    private createCells(columns: number, rows: number, preset: 'random' | 'empty'| 'flipper'): number[][] {
         const cells: number[][] = [];
         const isRandom: boolean = preset === 'random';
         let cellValue: 0 | 1;
@@ -132,11 +172,19 @@ export class CgolService {
         for (let y = 0; y < rows; y++) {
             cells.push([]);
             for (let x = 0; x < columns; x++) {
-                if (!isRandom) {
-                    cellValue = 0;
-                } else {
-                    cellValue = Math.random() < .5 ? 0 : 1;
+                switch(preset) {
+                    case 'random':
+                        cellValue =  Math.random() < .5 ? 0 : 1;
+                        break;
+                    case 'flipper':
+                        cellValue = 1;
+                        break;
+                    case 'empty':
+                    default:
+                        cellValue = 0;
+                        break;
                 }
+
                 cells[y].push(cellValue);
             }
         }
@@ -144,7 +192,7 @@ export class CgolService {
     }
 
     public showNextGeneration(config: MapConfig): MapConfig {
-        return this.calculateGenerations(config);
+        return this.calculateNextGeneration(config);
     }
 
     public calculateMultipleGenerations(config: MapConfig, generationCount: number): Observable<CgolWorkerMessage> {
@@ -187,7 +235,7 @@ export class CgolService {
     }
 
     // TODO: re-use function in cgol.worker
-    private calculateGenerations(config: MapConfig): MapConfig {
+    private calculateNextGeneration(config: MapConfig): MapConfig {
         // const nextGen: MapConfig = JSON.parse(JSON.stringify(config));
         const nextGen: MapConfig = config;
         let isGameOver: boolean = true;

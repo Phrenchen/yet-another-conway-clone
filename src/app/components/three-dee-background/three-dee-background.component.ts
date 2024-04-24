@@ -1,5 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { MapConfig } from 'src/app/interfaces/map-config';
 import { SceneConfig } from 'src/app/interfaces/scene-config';
+import { CgolService } from 'src/app/services/cgol.service';
 import { ThreejsFactoryService } from 'src/app/services/threejs-factory.service';
 import { ThreejsSceneService } from 'src/app/services/threejs-scene.service';
 
@@ -12,66 +15,109 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
   templateUrl: './three-dee-background.component.html',
   styleUrls: ['./three-dee-background.component.scss']
 })
-export class ThreeDeeBackgroundComponent implements OnInit{
+export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
+
+  @Input() mapConfig!: MapConfig;
 
   private sceneConfig!: SceneConfig;
+  private allBoxes: Array<THREE.Mesh[]> = [];
+  private allBoxesCopy: Array<THREE.Mesh[]> = this.allBoxes;
+
+  private controls?: OrbitControls;
+
+  private destroy$$: Subject<void> = new Subject();
 
   constructor(
     private threeJsFactoryService: ThreejsFactoryService,
-    private threeJsSceneService: ThreejsSceneService
+    private threeJsSceneService: ThreejsSceneService,
+    private cgol: CgolService,
   ) {}
 
   ngOnInit(): void {
     this.sceneConfig  = this.threeJsSceneService.createScene(document.querySelector('#bg') as HTMLCanvasElement);
 
-    const rows = 5;
-    const columns = 15;
-    const lineGap = 5;
-  
+
+    const rows: number = this.mapConfig.cells.length;
+    const columns: number = this.mapConfig.cells[0].length;
+    const size: number = 1;
+    const gap: number = size;
+    const boxSize: number = .9;
+    let lineOfBoxes: THREE.Mesh[];
+
     for(let i=0; i<rows; i++) {
-      const lineOfBoxes: THREE.Mesh[] = this.threeJsFactoryService.createLineOfBoxes(columns, new THREE.Vector3(5, 0, 0));
+      lineOfBoxes = this.threeJsFactoryService.createGrid(
+        'box', 
+        columns, 
+        new THREE.Vector3(boxSize, boxSize, boxSize),
+        new THREE.Vector3(0, 0, gap)
+    );
 
-      lineOfBoxes.forEach(box => {
-        box.position.y = i * lineGap;
-        this.sceneConfig.scene.add(box);
-      });
-  
-    }
+    this.allBoxes = [...this.allBoxes, lineOfBoxes];
+    lineOfBoxes.forEach(box => {
+      box.position.setX(i * gap);
+      this.sceneConfig.scene.add(box);
+    });
+  }
 
-
-    // const box: THREE.Mesh = this.threeJsFactoryService.createBox();
-    // this.sceneConfig.scene.add(box);
-
+    this.allBoxesCopy = [...this.allBoxes]; // todo: avoid cloning large array
 
     const lightHelper = this.threeJsFactoryService.createPointLight(this.sceneConfig.scene);
     this.sceneConfig.scene.add(lightHelper);
     
-    const controls = new OrbitControls(this.sceneConfig.camera, this.sceneConfig.renderer.domElement);
-
-
-
-
+    this.controls = new OrbitControls(this.sceneConfig.camera, this.sceneConfig.renderer.domElement);
+  
+    this.startGame();
+    
 
 
 // game loop ++++++++++++
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // torus.rotation.x += 0.01;
-      // torus.rotation.y += 0.005;
-      // torus.rotation.z += 0.01;
-      // torus.position.setX(torus.position.x + 0.05);
-      // torus.position.setY(torus.position.y + 0.05);
-      // torus.position.setZ(torus.position.z - 0.03);
+      this.allBoxes.forEach((row, y) => {
+        row.forEach((box, x) => {
+          box.rotation.x += .0001 * (y + x);
+          // box.rotation.y += .01;
+          // box.rotation.z += .01;
+        });
+      });
 
 
-      controls.update();
+      this.controls?.update();
 
       this.sceneConfig.renderer.render(this.sceneConfig.scene, this.sceneConfig.camera);
     }
     animate();
 
-    console.log('blubb')
+    console.log('*** started animation loop ***');
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    this.destroy$$.next();
+    this.startGame();
+    // this.updateMaterials();
+  }
+
+  private startGame(): void {
+    const gameTickDelay = 1000; // 1000 == 1fps / second
+    
+    this.cgol.playGame(this.mapConfig, gameTickDelay)
+      .pipe(
+        takeUntil(this.destroy$$),
+      )
+      .subscribe(nextGen => {
+        // console.log('game tick:', nextGen);
+
+        this.mapConfig = nextGen;
+        this.updateMaterials(nextGen);
+      });
+  }
+
+  private updateMaterials(mapConfig: MapConfig): void {
+    this.allBoxes.forEach((row, y) => {
+      row.forEach((box, x) => {
+        box.material = this.threeJsFactoryService.createMaterial(mapConfig.cells[y][x] === 1);
+      });
+    });
+  }
 }
