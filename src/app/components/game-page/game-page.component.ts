@@ -16,6 +16,9 @@ export class GamePageComponent {
 
   public tileCountX = 10;
   public tileCountY = 10; 
+  
+  public showInfo: boolean = false;
+  public isPlaying: boolean = true;
 
 
   public mapStartConfig: MapConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'random');
@@ -25,6 +28,20 @@ export class GamePageComponent {
 
   constructor(private cgol: CgolService) {}
 
+
+  public togglePlayPause(): void {
+    this.isPlaying = !this.isPlaying;
+  }
+
+  public createRandomMap(): void {
+    this.isPlaying = false;
+    this.mapStartConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'random');
+  }
+
+  public createEmptyMap(): void {
+    this.isPlaying = false;
+    this.mapStartConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'empty');
+  }
 
   public calculate(amountStr: string): void {
     const amount = parseInt(amountStr);

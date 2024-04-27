@@ -12,3 +12,26 @@ body {
   box-sizing: border-box;
   font-family: "American Typewriter";
 }
+
+
+.btn-cta {
+  padding: 1rem 0.5rem;
+
+  background-color: rgb(55, 128, 47);
+  font-weight: bold;
+  font-size: 1.2rem;
+
+  border-radius: .3rem;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  padding: .5rem 0.3rem;
+
+  background-color: rgb(128, 112, 47);
+  font-weight: bold;
+  font-size: 1rem;
+
+  border-radius: .3rem;
+  cursor: pointer;
+}

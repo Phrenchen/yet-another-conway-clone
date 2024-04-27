@@ -1,20 +1,13 @@
-<div>
-    <div>
-        <div>
-            <b>Start Config</b>
-            <app-cgol-map #mainMap [mapConfig]="mapStartConfig" [useAvailableSpace]="true"
-                [isPaused]="true">
-            </app-cgol-map>
-        </div>
-        <div>
-            <b>Running: ADD PREV - NEXT BUTTONS: use a custom mapConfig!</b>
-            <app-cgol-map #mainMap [mapConfig]="mapStartConfig" [fps]="5" [useAvailableSpace]="true"
-                [isPaused]="false">
-            </app-cgol-map>
-        </div>
-    </div>
-    <div>
-        <h3>Pre-Calculate Generations</h3>
+<app-three-dee-background 
+[mapConfig]="mapStartConfig"
+[isPlaying]="isPlaying"
+></app-three-dee-background>
+
+<div class="overlay">
+      
+
+    <div (mouseover)="showInfo = true" (mouseout)="showInfo = false">
+        <h3>Select Map Size</h3>
         <div>
             <div>
                 <label for="input-tile-x">Horizontally</label>
@@ -26,36 +19,31 @@
             </div>
         </div>
 
-
         <div>
-            <label for="input-gen-count">How many generations?</label>
-            <input #generationCountInput id="input-gen-count"
-                type="number"  [defaultValue]="100" min="1" step="5"
-            >
-        </div>    
+            <button 
+                class="btn-secondary"
+                (click)="createEmptyMap()"
+                >
+                Generate Empty Map
+            </button>
+            <button
+                class="btn-secondary"
+                (click)="createRandomMap()"
+                >
+                Generate Random Map
+            </button>
 
-        <button (click)="calculate(generationCountInput.value)">
-            Calculate
-        </button>
-        
-
-        <pre>
-            Calculated: {{workerMessage?.progress}}% of {{'test'}}    
-            Has completed: {{ workerMessage?.completed }}
-            Map Size: {{ tileCountX }} x {{ tileCountY }} ({{ (tileCountX * tileCountY) | number}} Tiles)
-            Last gen survivors count: {{ livingCellCount | number}}
-           
-        </pre>
+            <button
+                class="btn-cta"
+                (click)="togglePlayPause()"
+                >
+                {{ isPlaying ? 'Pause' : 'Play'}}
+            </button>
+        </div>
     </div>
-
-    <div>
-<app-three-dee-background
-[mapConfig]="mapStartConfig"
-></app-three-dee-background>
-
-        <!-- <b>Result</b>
-        <app-cgol-map #mainMap [mapConfig]="mapConfig" [useAvailableSpace]="true"
-            [isPaused]="true">
-        </app-cgol-map> -->
-    </div>
+    <pre *ngIf="showInfo" style="pointer-events: none;">
+        <b>Rotate Camera:</b> Hold down 1 Finger and drag.
+        <b>Move Camera:</b> Hold down 2 fingers and drag.
+        <b>Zoom in and out: </b> "Swipe" up or down with 2 fingers.
+    </pre>
 </div>
