@@ -150,15 +150,16 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
     setTimeout(() => {
       this.createBoxes();
 
-      const gameTickDelay = 1000; // 1000 == 1fps / second
+      // TODO: @Input tickDuration
+      const tickDuration = 1000; // 1000 == 1fps / second
       
-      this.cgol.playGame(this.mapConfig, gameTickDelay)
+      this.cgol.playGame(this.mapConfig, tickDuration)
         .pipe(
           filter(() => !this.isPlaying),
           takeUntil(this.destroy$$),
         )
         .subscribe(nextGen => {
-          console.log('game tick:', nextGen);
+          // console.log('game tick:', nextGen);
 
           this.mapConfig = nextGen;
           this.updateMaterials(nextGen);

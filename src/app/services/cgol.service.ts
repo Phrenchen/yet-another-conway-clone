@@ -42,11 +42,11 @@ export class CgolService {
     //     this.showPatternList$$.next(!this.showPatternList$$.value);
     // }
 
-    public playGame(mapConfig: MapConfig, delay: number = 1000): Observable<MapConfig> {
+    public playGame(mapConfig: MapConfig, tickDuration: number = 1000): Observable<MapConfig> {
         return of(mapConfig)
         .pipe(
             switchMap(() => {
-                return interval(delay);
+                return interval(tickDuration);
             }),
             map(tick => {
                 // calculate next gen

@@ -8,18 +8,24 @@
 
     <div (mouseover)="showInfo = true" (mouseout)="showInfo = false">
         <h3>Select Map Size</h3>
-        <div>
-            <div>
-                <label for="input-tile-x">Horizontally</label>
-                <input id="input-tile-x" type="number" min="10" max="10000" step="10" [defaultValue]="100" [(ngModel)]="tileCountX">
+        <div class="flex-horizontal-spread">
+            <div class="flex-horizontal-center">
+                <span>X</span>
+                <app-number-selector
+                    [value]="tileCountX"
+                    (valueChange)="tileCountX = $event"
+                ></app-number-selector>
             </div>
-            <div>
-                <label for="input-tile-x">Vertically</label>
-                <input id="input-tile-y" type="number" min="10" max="10000" step="10" [defaultValue]="100" [(ngModel)]="tileCountY">
+            <div class="flex-horizontal-center">
+                <span><b>Y</b></span>
+                <app-number-selector
+                    [value]="tileCountY"
+                    (valueChange)="tileCountY = $event"
+                ></app-number-selector>
             </div>
-        </div>
+        </div> 
 
-        <div>
+        <div class="flex-horizontal-center">
             <button 
                 class="btn-secondary"
                 (click)="createEmptyMap()"

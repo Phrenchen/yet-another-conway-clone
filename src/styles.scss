@@ -13,9 +13,25 @@ body {
   font-family: "American Typewriter";
 }
 
+.flex-horizontal-spread {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.flex-horizontal-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 
 .btn-cta {
-  padding: 1rem 0.5rem;
+  padding: .5rem 1rem;
 
   background-color: rgb(55, 128, 47);
   font-weight: bold;
@@ -26,7 +42,7 @@ body {
 }
 
 .btn-secondary {
-  padding: .5rem 0.3rem;
+  padding: .5rem 0.5rem;
 
   background-color: rgb(128, 112, 47);
   font-weight: bold;
