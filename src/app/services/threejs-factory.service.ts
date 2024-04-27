@@ -14,8 +14,9 @@ export class ThreejsFactoryService {
     return [];
   }
 
-  public createGrid(type: 'box' | 'sphere' | 'torus', 
+  public createLine(type: 'box' | 'sphere' | 'torus', 
     amount: number, 
+    row: number,
     size: THREE.Vector3 = new THREE.Vector3(1, 1, 1), 
     position: THREE.Vector3 = new THREE.Vector3(1, 0, 1), 
     randomRotation: boolean = false,
@@ -38,6 +39,9 @@ export class ThreejsFactoryService {
           box = this.createTorus();
       }
 
+      // construct name i.e. 'selectable: x,y' -> '0,0', '1,0',...
+      box.name = 'selectable-' + boxes.length + ',' + row;
+
       box.position.x = position.x * boxes.length;
       box.position.y = position.y * boxes.length;
       box.position.z = position.z * boxes.length;
@@ -49,7 +53,6 @@ export class ThreejsFactoryService {
       }
       boxes.push(box);
     }
-
     return boxes;
   }
   

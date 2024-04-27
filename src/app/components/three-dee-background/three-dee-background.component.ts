@@ -1,5 +1,5 @@
 import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, filter, fromEvent, takeUntil } from 'rxjs';
 import { MapConfig } from 'src/app/interfaces/map-config';
 import { SceneConfig } from 'src/app/interfaces/scene-config';
 import { CgolService } from 'src/app/services/cgol.service';
@@ -18,15 +18,15 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
 
   @Input() mapConfig!: MapConfig;
+  @Input() isPlaying: boolean = true;
 
   private sceneConfig!: SceneConfig;
-
   private allBoxes: Array<THREE.Mesh[]> = [];
-  private allBoxesCopy: Array<THREE.Mesh[]> = this.allBoxes;
-
   private controls?: OrbitControls;
-
   private destroy$$: Subject<void> = new Subject();
+
+  private isPointerDown: boolean = true;
+  private objectUnderPointer?: THREE.Intersection;
 
   constructor(
     private threeJsFactoryService: ThreejsFactoryService,
@@ -37,60 +37,90 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
   ngOnInit(): void {
     this.sceneConfig  = this.threeJsSceneService.createScene(document.querySelector('#bg') as HTMLCanvasElement);
 
-
-  //   const rows: number = this.mapConfig.cells.length;
-  //   const columns: number = this.mapConfig.cells[0].length;
-  //   const size: number = 1;
-  //   const gap: number = size;
-  //   const boxSize: number = .9;
-  //   let lineOfBoxes: THREE.Mesh[];
-
-  //   for(let i=0; i<rows; i++) {
-  //     lineOfBoxes = this.threeJsFactoryService.createGrid(
-  //       'box', 
-  //       columns, 
-  //       new THREE.Vector3(boxSize, boxSize, boxSize),
-  //       new THREE.Vector3(0, 0, gap)
-  //   );
-
-  //   this.allBoxes = [...this.allBoxes, lineOfBoxes];
-  //   lineOfBoxes.forEach(box => {
-  //     box.position.setX(i * gap);
-  //     this.sceneConfig.scene.add(box);
-  //   });
-  // }
-
-    this.allBoxesCopy = [...this.allBoxes]; // todo: avoid cloning large array
-
     const lightHelper = this.threeJsFactoryService.createPointLight(this.sceneConfig.scene);
     this.sceneConfig.scene.add(lightHelper);
     
     this.controls = new OrbitControls(this.sceneConfig.camera, this.sceneConfig.renderer.domElement);
-  
-    // this.startGame();
     
 
+    // observe keyboard input
+    fromEvent(window, 'mousedown')
+      .pipe()
+      .subscribe(res => {
+        console.log('mouse down');
+        this.isPointerDown = true;
+      });
 
-// game loop ++++++++++++
+    fromEvent(window, 'mouseup')
+      .pipe()
+      .subscribe(res => {
+        console.log('mouse up');
+        // this.isPointerDown = false;
+      });
+
+
+    // game loop ++++++++++++
     const animate = () => {
       requestAnimationFrame(animate);
 
+      // raycast objects
+
+
+      // rotate all boxes. remove?
       this.allBoxes.forEach((row, y) => {
         row.forEach((box, x) => {
-          box.rotation.x += .0001 * (y + x);
+          // box.rotation.x += .0001 * (x);
           // box.rotation.y += .01;
           // box.rotation.z += .01;
         });
       });
 
-
       this.controls?.update();
+
+      // detect objects under pointer
+      const newObjectsUnderPointer: THREE.Intersection[] = this.threeJsSceneService.getObjectsUnderPointer(this.sceneConfig.scene, this.sceneConfig.camera, this.allBoxes);
+      let newObjectUnderPointer: THREE.Intersection | undefined = undefined;
+      const lastObjectUnderPointer: THREE.Intersection | undefined = this.objectUnderPointer;
+
+      if (newObjectsUnderPointer.length > 0) {
+        // this.objectUnderPointer = newObjectsUnderPointer[0];
+        newObjectUnderPointer = newObjectsUnderPointer[0];
+        (newObjectUnderPointer.object as THREE.Mesh | any)?.material.color?.set( 0xffffff );
+        // console.log('new object under pointer', newObjectUnderPointer);
+        
+      }
+
+
+      if (lastObjectUnderPointer && lastObjectUnderPointer !== newObjectUnderPointer
+      // && (this.threeJsSceneService.mouse.x != this.threeJsSceneService.lastMouse.x || 
+      // this.threeJsSceneService.mouse.y != this.threeJsSceneService.lastMouse.y)
+    ) {
+        const tileName: string | undefined = this.objectUnderPointer?.object.name || undefined;
+        
+        console.log('tilename', tileName);
+        if (tileName && tileName.length > 0) {
+          // selectable-0,1
+          // const coordinateStr = tileName.split('selectable-')[1]?.split(',');
+          const parts = tileName.split('selectable-');
+          console.log('tilename', tileName, parts);
+
+          (this.objectUnderPointer?.object as THREE.Mesh | any)?.material.color?.set( 0x00ffff);  
+          this.objectUnderPointer = newObjectUnderPointer;
+          
+        }
+        
+        
+
+       
+      }
+
+     
+      
 
       this.sceneConfig.renderer.render(this.sceneConfig.scene, this.sceneConfig.camera);
     }
-    animate();
-
-    console.log('*** started animation loop ***');
+    // game loop END +++++++++++++
+    animate();  // trigger loop
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -124,10 +154,11 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
       
       this.cgol.playGame(this.mapConfig, gameTickDelay)
         .pipe(
+          filter(() => !this.isPlaying),
           takeUntil(this.destroy$$),
         )
         .subscribe(nextGen => {
-          // console.log('game tick:', nextGen);
+          console.log('game tick:', nextGen);
 
           this.mapConfig = nextGen;
           this.updateMaterials(nextGen);
@@ -136,7 +167,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
 
         this.updateMaterials(this.mapConfig);
 
-      }, 1000
+      }, 0
     );
   }
 
@@ -149,9 +180,10 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
     let lineOfBoxes: THREE.Mesh[];
 
     for(let i=0; i<rows; i++) {
-      lineOfBoxes = this.threeJsFactoryService.createGrid(
+      lineOfBoxes = this.threeJsFactoryService.createLine(
         'box', 
         columns, 
+        i,
         new THREE.Vector3(boxSize, boxSize, boxSize),
         new THREE.Vector3(0, 0, gap)
       );
@@ -167,7 +199,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
   private updateMaterials(mapConfig: MapConfig): void {
     this.allBoxes.forEach((row, y) => {
       row.forEach((box, x) => {
-        box.material = this.threeJsFactoryService.createMaterial(mapConfig.cells[y][x] === 1);
+        (box.material as THREE.MeshStandardMaterial | any).color?.set( mapConfig.cells[y][x] === 1 ? 0x00FF00 : 0xFF0000);
       });
     });
   }
