@@ -4,24 +4,27 @@
 ></app-three-dee-background>
 
 <div class="overlay">
-      
 
     <div (mouseover)="showInfo = true" (mouseout)="showInfo = false">
-        <h3>Select Map Size</h3>
-        <div class="flex-horizontal-spread">
+        
+        <div class="map-size-selector flex-horizontal-spread">
+            <h3>Select Map Size</h3>
+
             <div class="flex-horizontal-center">
-                <span>X</span>
-                <app-number-selector
-                    [value]="tileCountX"
-                    (valueChange)="tileCountX = $event"
-                ></app-number-selector>
-            </div>
-            <div class="flex-horizontal-center">
-                <span><b>Y</b></span>
-                <app-number-selector
-                    [value]="tileCountY"
-                    (valueChange)="tileCountY = $event"
-                ></app-number-selector>
+                <div class="number-selector flex-horizontal-center">
+                    <span>X</span>
+                    <app-number-selector
+                        [value]="tileCountX"
+                        (valueChange)="tileCountX = $event"
+                    ></app-number-selector>
+                </div>
+                <div class="number-selector flex-horizontal-center">
+                    <span><b>Y</b></span>
+                    <app-number-selector
+                        [value]="tileCountY"
+                        (valueChange)="tileCountY = $event"
+                    ></app-number-selector>
+                </div>
             </div>
         </div> 
 
@@ -48,6 +51,8 @@
         </div>
     </div>
     <pre *ngIf="showInfo" style="pointer-events: none;">
+        Select a Cube to toggle its state.
+
         <b>Rotate Camera:</b> Hold down 1 Finger and drag.
         <b>Move Camera:</b> Hold down 2 fingers and drag.
         <b>Zoom in and out: </b> "Swipe" up or down with 2 fingers.

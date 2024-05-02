@@ -6,8 +6,9 @@ import { GamePageComponent } from './components/game-page/game-page.component';
 
 const routes: Routes = [
     {path: 'instructions', component: InstructionsComponent},
-    {path: 'game', component: GamePageComponent},
-    {path: '', component: ConwayPageComponent, pathMatch: 'full'}
+    // {path: 'game', component: GamePageComponent},
+    {path: '', component: GamePageComponent, pathMatch: 'full'}
+    // {path: '', component: ConwayPageComponent, pathMatch: 'full'}
 ];
 
 @NgModule({

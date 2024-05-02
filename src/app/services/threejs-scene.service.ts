@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { SceneConfig } from '../interfaces/scene-config';
 
 import * as THREE from 'three';
+import { ThreejsFactoryService } from './threejs-factory.service';
+import { fromEvent, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,9 +15,22 @@ export class ThreejsSceneService {
   public lastMouse: THREE.Vector2 = new THREE.Vector2();
   public mouse: THREE.Vector2 = new THREE.Vector2();
 
-  constructor() {
+  constructor(private threeFactory: ThreejsFactoryService) {
     window.addEventListener('mousemove', (event: any) => this.onMouseMove(event), false);
    }
+
+   public observeResize(sceneConfig: SceneConfig): void {
+    fromEvent(window, 'resize')
+    .pipe(
+      tap(() => {
+        sceneConfig.camera.aspect = window.innerWidth / window.innerHeight;
+        sceneConfig.camera.updateProjectionMatrix();
+        sceneConfig.renderer.setSize(window.innerWidth, window.innerHeight);
+      })
+    )
+    .subscribe();
+   }
+
 
    private onMouseMove(event: Event | any) {
     // Calculate mouse position in normalized device coordinates
@@ -70,14 +85,16 @@ export class ThreejsSceneService {
 
   public createScene(canvas: HTMLCanvasElement): SceneConfig {
     const scene: THREE.Scene = new THREE.Scene();
-    const camera: THREE.Camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer: THREE.Renderer = new THREE.WebGLRenderer({
       canvas
     })
 
-
+    // scene.add(this.threeFactory.createSkybox());
+    // scene.add(this.threeFactory.createFloor());
+    
     const gridHelper = new THREE.GridHelper(100, 100);
-    // scene.add(gridHelper);
+    scene.add(gridHelper);
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.position.setX(0);
@@ -86,10 +103,15 @@ export class ThreejsSceneService {
     // camera.lookAt(new THREE.Vector3(0, 0, 0));
     renderer.render(scene, camera);
 
-    return {
+    const sceneConfig: SceneConfig = {
       scene,
       camera,
       renderer
-    }
+    };
+    this.observeResize(sceneConfig);
+
+
+
+    return sceneConfig;
   }
 }

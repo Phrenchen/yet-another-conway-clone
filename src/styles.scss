@@ -29,13 +29,21 @@ body {
   gap: 1rem;
 }
 
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+}
 
+
+// Buttons
 .btn-cta {
   padding: .5rem 1rem;
 
   background-color: rgb(55, 128, 47);
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1rem;
 
   border-radius: .3rem;
   cursor: pointer;

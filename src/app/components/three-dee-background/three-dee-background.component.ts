@@ -151,7 +151,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
       this.createBoxes();
 
       // TODO: @Input tickDuration
-      const tickDuration = 1000; // 1000 == 1fps / second
+      const tickDuration = 100; // 1000 == 1fps / second
       
       this.cgol.playGame(this.mapConfig, tickDuration)
         .pipe(

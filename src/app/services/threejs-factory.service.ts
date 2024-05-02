@@ -55,12 +55,25 @@ export class ThreejsFactoryService {
     }
     return boxes;
   }
+
+  public createFloor(): THREE.Mesh {
+    const floor = this.createBox(new THREE.Vector3(15, 1, 15));
+    floor.position.setY(-1);
+    (floor.material as THREE.MeshStandardMaterial).color.set('0xffffff');
+    return floor;
+  }
+
+  public createSkybox(): THREE.Mesh {
+    const skybox: THREE.Mesh = this.createBox(new THREE.Vector3(999, 999, 999));
+    skybox.material = this.getCubeMaterial();
+    return skybox;
+  }
   
   public createBox(size: THREE.Vector3 = new THREE.Vector3(1, 1, 1)): THREE.Mesh {
     const geometry: THREE.BoxGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
     const material: THREE.MeshStandardMaterial = this.createMaterial(false);
-    const sphere: THREE.Mesh = new THREE.Mesh(geometry, material);
-    return sphere;
+    const box: THREE.Mesh = new THREE.Mesh(geometry, material);
+    return box;
   }
   
   public createSphere(): THREE.Mesh {
@@ -80,6 +93,35 @@ export class ThreejsFactoryService {
   }
 
   // MATERIALS
+  private getCubeMaterial(): THREE.MeshBasicMaterial[] {
+    return [
+      new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('./assets/front.jpg'),
+        side: THREE.DoubleSide
+      }),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('./assets/back.jpg'),
+        side: THREE.DoubleSide
+      }),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('./assets/up.jpg'),
+        side: THREE.DoubleSide
+      }),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('./assets/bottom.jpg'),
+        side: THREE.DoubleSide
+      }),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('./assets/right.jpg'),
+        side: THREE.DoubleSide
+      }),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('./assets/left.jpg'),
+        side: THREE.DoubleSide
+      }),
+    ];
+  }
+  
   public createMaterial(isAlive: boolean): THREE.MeshStandardMaterial {
     switch(isAlive) {
       case true:

@@ -2,6 +2,6 @@ import * as THREE from 'three';
 
 export interface SceneConfig {
     scene: THREE.Scene;
-    camera: THREE.Camera;
+    camera: THREE.PerspectiveCamera;
     renderer: THREE.Renderer;
 }
