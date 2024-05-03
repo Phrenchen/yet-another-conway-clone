@@ -3,7 +3,7 @@ import { SceneConfig } from '../interfaces/scene-config';
 
 import * as THREE from 'three';
 import { ThreejsFactoryService } from './threejs-factory.service';
-import { fromEvent, tap } from 'rxjs';
+import { Observable, fromEvent, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -19,16 +19,15 @@ export class ThreejsSceneService {
     window.addEventListener('mousemove', (event: any) => this.onMouseMove(event), false);
    }
 
-   public observeResize(sceneConfig: SceneConfig): void {
-    fromEvent(window, 'resize')
+   public observeResize(sceneConfig: SceneConfig): Observable<Event>{
+    return fromEvent(window, 'resize')
     .pipe(
       tap(() => {
         sceneConfig.camera.aspect = window.innerWidth / window.innerHeight;
         sceneConfig.camera.updateProjectionMatrix();
         sceneConfig.renderer.setSize(window.innerWidth, window.innerHeight);
       })
-    )
-    .subscribe();
+    );
    }
 
 
@@ -108,7 +107,7 @@ export class ThreejsSceneService {
       camera,
       renderer
     };
-    this.observeResize(sceneConfig);
+    this.observeResize(sceneConfig).subscribe();
 
 
 

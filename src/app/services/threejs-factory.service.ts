@@ -56,18 +56,25 @@ export class ThreejsFactoryService {
     return boxes;
   }
 
-  public createFloor(): THREE.Mesh {
-    const floor = this.createBox(new THREE.Vector3(15, 1, 15));
-    floor.position.setY(-1);
-    (floor.material as THREE.MeshStandardMaterial).color.set('0xffffff');
+  public createBeaver(): THREE.Mesh {
+    const floor = this.createBox(new THREE.Vector3(1, 2, 1));
+    floor.material = this.createBoxMaterial(['./assets/happy-beaver.png']);
+
     return floor;
   }
 
-  public createSkybox(): THREE.Mesh {
-    const skybox: THREE.Mesh = this.createBox(new THREE.Vector3(999, 999, 999));
-    skybox.material = this.getCubeMaterial();
-    return skybox;
-  }
+  // public createFloor(): THREE.Mesh {
+  //   const floor = this.createBox(new THREE.Vector3(15, 1, 15));
+  //   floor.position.setY(-1);
+  //   (floor.material as THREE.MeshStandardMaterial).color.set('0xffffff');
+  //   return floor;
+  // }
+
+  // public createSkybox(): THREE.Mesh {
+  //   const skybox: THREE.Mesh = this.createBox(new THREE.Vector3(999, 999, 999));
+  //   skybox.material = this.getCubeMaterial();
+  //   return skybox;
+  // }
   
   public createBox(size: THREE.Vector3 = new THREE.Vector3(1, 1, 1)): THREE.Mesh {
     const geometry: THREE.BoxGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
@@ -93,6 +100,19 @@ export class ThreejsFactoryService {
   }
 
   // MATERIALS
+  private createBoxMaterial(imageUrls: string[]): THREE.MeshBasicMaterial[] {
+    while(imageUrls.length < 6) {
+      imageUrls.push(imageUrls[0]);
+    }
+
+    return imageUrls.map(url => {
+      return  new THREE.MeshBasicMaterial({
+          map: new THREE.TextureLoader().load(url),
+          // side: THREE.DoubleSide
+        });
+      });
+  }
+
   private getCubeMaterial(): THREE.MeshBasicMaterial[] {
     return [
       new THREE.MeshBasicMaterial({

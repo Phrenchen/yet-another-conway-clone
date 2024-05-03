@@ -3,6 +3,7 @@ import { Subject, filter, fromEvent, takeUntil } from 'rxjs';
 import { MapConfig } from 'src/app/interfaces/map-config';
 import { SceneConfig } from 'src/app/interfaces/scene-config';
 import { CgolService } from 'src/app/services/cgol.service';
+import { MathHelperService } from 'src/app/services/math-helper.service';
 import { ThreejsFactoryService } from 'src/app/services/threejs-factory.service';
 import { ThreejsSceneService } from 'src/app/services/threejs-scene.service';
 
@@ -28,10 +29,13 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
   private isPointerDown: boolean = true;
   private objectUnderPointer?: THREE.Intersection;
 
+  private beavers: THREE.Mesh[] = [];
+
   constructor(
     private threeJsFactoryService: ThreejsFactoryService,
     private threeJsSceneService: ThreejsSceneService,
     private cgol: CgolService,
+    private mathHelper: MathHelperService,
   ) {}
 
   ngOnInit(): void {
@@ -42,6 +46,14 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
     
     this.controls = new OrbitControls(this.sceneConfig.camera, this.sceneConfig.renderer.domElement);
     
+    this.beavers = new Array(20).fill(0).map(() => {
+      const beaver = this.threeJsFactoryService.createBeaver();
+      beaver.position.setX(this.mathHelper.getRandomInt(0, 10));
+      beaver.position.setY(this.mathHelper.getRandomInt(2, 2));
+      beaver.position.setZ(this.mathHelper.getRandomInt(0, 10));
+      this.sceneConfig.scene.add(beaver);
+      return beaver;
+    });
 
     // observe keyboard input
     fromEvent(window, 'mousedown')
@@ -65,6 +77,12 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
 
       // raycast objects
 
+
+      this.beavers.forEach(beaver => {
+      //   beaver.rotateX(this.mathHelper.getRandomInt(1, 1000) / 100000);
+        beaver.rotateY(this.mathHelper.getRandomInt(1, 1000) / 100000);
+      //   beaver.rotateZ(this.mathHelper.getRandomInt(1, 1000) / 100000);
+      } )
 
       // rotate all boxes. remove?
       this.allBoxes.forEach((row, y) => {
