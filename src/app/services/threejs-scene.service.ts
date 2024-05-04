@@ -86,14 +86,16 @@ export class ThreejsSceneService {
     const scene: THREE.Scene = new THREE.Scene();
     const camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer: THREE.Renderer = new THREE.WebGLRenderer({
-      canvas
+      canvas,
+      antialias: true,
+      alpha: true
     })
 
     // scene.add(this.threeFactory.createSkybox());
     // scene.add(this.threeFactory.createFloor());
     
     const gridHelper = new THREE.GridHelper(100, 100);
-    scene.add(gridHelper);
+    // scene.add(gridHelper);
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.position.setX(0);

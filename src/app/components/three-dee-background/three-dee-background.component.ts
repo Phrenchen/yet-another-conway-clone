@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Subject, filter, fromEvent, takeUntil } from 'rxjs';
 import { MapConfig } from 'src/app/interfaces/map-config';
 import { SceneConfig } from 'src/app/interfaces/scene-config';
@@ -8,7 +8,7 @@ import { ThreejsFactoryService } from 'src/app/services/threejs-factory.service'
 import { ThreejsSceneService } from 'src/app/services/threejs-scene.service';
 
 import * as THREE from 'three';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 
 @Component({
@@ -16,7 +16,7 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
   templateUrl: './three-dee-background.component.html',
   styleUrls: ['./three-dee-background.component.scss']
 })
-export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
+export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
 
   @Input() mapConfig!: MapConfig;
   @Input() isPlaying: boolean = true;
@@ -36,104 +36,27 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
     private threeJsSceneService: ThreejsSceneService,
     private cgol: CgolService,
     private mathHelper: MathHelperService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    this.sceneConfig  = this.threeJsSceneService.createScene(document.querySelector('#bg') as HTMLCanvasElement);
+    this.sceneConfig = this.threeJsSceneService.createScene(document.querySelector('#bg') as HTMLCanvasElement);
 
     const lightHelper = this.threeJsFactoryService.createPointLight(this.sceneConfig.scene);
     this.sceneConfig.scene.add(lightHelper);
-    
+
     this.controls = new OrbitControls(this.sceneConfig.camera, this.sceneConfig.renderer.domElement);
-    
-    this.beavers = new Array(20).fill(0).map(() => {
-      const beaver = this.threeJsFactoryService.createBeaver();
-      beaver.position.setX(this.mathHelper.getRandomInt(0, 10));
-      beaver.position.setY(this.mathHelper.getRandomInt(2, 2));
-      beaver.position.setZ(this.mathHelper.getRandomInt(0, 10));
-      this.sceneConfig.scene.add(beaver);
-      return beaver;
-    });
 
-    // observe keyboard input
-    fromEvent(window, 'mousedown')
-      .pipe()
-      .subscribe(res => {
-        console.log('mouse down');
-        this.isPointerDown = true;
-      });
+    this.createObjects();
 
-    fromEvent(window, 'mouseup')
-      .pipe()
-      .subscribe(res => {
-        console.log('mouse up');
-        // this.isPointerDown = false;
-      });
-
+    this.initEvents();
 
     // game loop ++++++++++++
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // raycast objects
-
-
-      this.beavers.forEach(beaver => {
-      //   beaver.rotateX(this.mathHelper.getRandomInt(1, 1000) / 100000);
-        beaver.rotateY(this.mathHelper.getRandomInt(1, 1000) / 100000);
-      //   beaver.rotateZ(this.mathHelper.getRandomInt(1, 1000) / 100000);
-      } )
-
-      // rotate all boxes. remove?
-      this.allBoxes.forEach((row, y) => {
-        row.forEach((box, x) => {
-          // box.rotation.x += .0001 * (x);
-          // box.rotation.y += .01;
-          // box.rotation.z += .01;
-        });
-      });
-
+      this.updateObjects();
       this.controls?.update();
-
-      // detect objects under pointer
-      const newObjectsUnderPointer: THREE.Intersection[] = this.threeJsSceneService.getObjectsUnderPointer(this.sceneConfig.scene, this.sceneConfig.camera, this.allBoxes);
-      let newObjectUnderPointer: THREE.Intersection | undefined = undefined;
-      const lastObjectUnderPointer: THREE.Intersection | undefined = this.objectUnderPointer;
-
-      if (newObjectsUnderPointer.length > 0) {
-        // this.objectUnderPointer = newObjectsUnderPointer[0];
-        newObjectUnderPointer = newObjectsUnderPointer[0];
-        (newObjectUnderPointer.object as THREE.Mesh | any)?.material.color?.set( 0xffffff );
-        // console.log('new object under pointer', newObjectUnderPointer);
-        
-      }
-
-
-      if (lastObjectUnderPointer && lastObjectUnderPointer !== newObjectUnderPointer
-      // && (this.threeJsSceneService.mouse.x != this.threeJsSceneService.lastMouse.x || 
-      // this.threeJsSceneService.mouse.y != this.threeJsSceneService.lastMouse.y)
-    ) {
-        const tileName: string | undefined = this.objectUnderPointer?.object.name || undefined;
-        
-        console.log('tilename', tileName);
-        if (tileName && tileName.length > 0) {
-          // selectable-0,1
-          // const coordinateStr = tileName.split('selectable-')[1]?.split(',');
-          const parts = tileName.split('selectable-');
-          console.log('tilename', tileName, parts);
-
-          (this.objectUnderPointer?.object as THREE.Mesh | any)?.material.color?.set( 0x00ffff);  
-          this.objectUnderPointer = newObjectUnderPointer;
-          
-        }
-        
-        
-
-       
-      }
-
-     
-      
+      this.detectObjectSelection();
 
       this.sceneConfig.renderer.render(this.sceneConfig.scene, this.sceneConfig.camera);
     }
@@ -145,16 +68,112 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
     this.destroy$$.next();
 
     console.log('start new game?');
-    
+
     this.startGame();
     // this.updateMaterials();
   }
 
+  private createObjects(): void {
+    this.beavers = new Array(1).fill(0).map(() => {
+      const beaver = this.threeJsFactoryService.createBeaver();
+      beaver.position.setX(this.mathHelper.getRandomInt(0, 10) + .5);
+      beaver.position.setY(this.mathHelper.getRandomInt(1, 1));
+      beaver.position.setZ(this.mathHelper.getRandomInt(0, 10) + .5);
+      this.sceneConfig.scene.add(beaver);
+      return beaver;
+    });
+  }
+
+  private updateObjects(): void {
+    // this.beavers.forEach(beaver => {
+    //   //   beaver.rotateX(this.mathHelper.getRandomInt(1, 1000) / 100000);
+    //   beaver.rotateY(this.mathHelper.getRandomInt(1, 1000) / 100000);
+    //   //   beaver.rotateZ(this.mathHelper.getRandomInt(1, 1000) / 100000);
+    // });
+
+    // rotate all boxes. remove?
+    // this.allBoxes.forEach((row, y) => {
+    //   row.forEach((box, x) => {
+    // box.rotation.x += .0001 * (x);
+    // box.rotation.y += .01;
+    // box.rotation.z += .01;
+    //   });
+    // });
+  }
+
+  private detectObjectSelection(): void {
+    // detect objects under pointer
+    const newObjectsUnderPointer: THREE.Intersection[] = this.threeJsSceneService.getObjectsUnderPointer(this.sceneConfig.scene, this.sceneConfig.camera, this.allBoxes);
+    let newObjectUnderPointer: THREE.Intersection | undefined = undefined;
+    const lastObjectUnderPointer: THREE.Intersection | undefined = this.objectUnderPointer;
+
+    if (newObjectsUnderPointer.length > 0) {
+      // this.objectUnderPointer = newObjectsUnderPointer[0];
+      newObjectUnderPointer = newObjectsUnderPointer[0];
+      this.objectUnderPointer = newObjectUnderPointer;
+
+      (newObjectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0xffffff);
+      // console.log('new object under pointer', newObjectUnderPointer);
+    }
+
+
+
+    if (lastObjectUnderPointer && lastObjectUnderPointer !== newObjectUnderPointer
+      // && (this.threeJsSceneService.mouse.x != this.threeJsSceneService.lastMouse.x || 
+      // this.threeJsSceneService.mouse.y != this.threeJsSceneService.lastMouse.y)
+    ) {
+      const tileName: string | undefined = this.objectUnderPointer?.object.name || undefined;
+
+      // console.log('tilename', tileName);
+      if (tileName && tileName.length > 0) {
+        // selectable-0,1
+        // const coordinateStr = tileName.split('selectable-')[1]?.split(',');
+        const parts = tileName.split('selectable-');
+        // console.log('tilename', tileName, parts);
+
+        // highlight pointer-over
+        (this.objectUnderPointer?.object as THREE.Mesh | any)?.material.color?.set(0xff9999);
+        this.objectUnderPointer = newObjectUnderPointer;
+      }
+    }
+  }
+
+  private initEvents(): void {
+    fromEvent(window, 'click')
+      .pipe()
+      .subscribe(res => {
+        // console.log('click', res);
+        this.activateCurrentCell();
+      });
+
+    fromEvent(window, 'mousedown')
+      .pipe()
+      .subscribe(res => {
+        // console.log('mouse down');
+        this.isPointerDown = true;
+      });
+
+    fromEvent(window, 'mouseup')
+      .pipe()
+      .subscribe(res => {
+        // console.log('mouse up');
+        this.isPointerDown = false;
+      });
+  }
+
+  private activateCurrentCell(): void {
+    if (this.objectUnderPointer) {
+      
+      (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0x0000ff);
+      console.log('activate!°!', (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color);
+    }
+  }
+
   private startGame(): void {
     console.log('starting new game');
-    
+
     // dispose old game
-    if(this.allBoxes.length > 0) {
+    if (this.allBoxes.length > 0) {
       this.allBoxes.forEach(row => {
         row.forEach(box => {
           this.sceneConfig.scene.remove(box);
@@ -170,10 +189,10 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
 
       // TODO: @Input tickDuration
       const tickDuration = 100; // 1000 == 1fps / second
-      
+
       this.cgol.playGame(this.mapConfig, tickDuration)
         .pipe(
-          filter(() => !this.isPlaying),
+          filter(() => this.isPlaying),
           takeUntil(this.destroy$$),
         )
         .subscribe(nextGen => {
@@ -184,9 +203,9 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
         });
 
 
-        this.updateMaterials(this.mapConfig);
+      this.updateMaterials(this.mapConfig);
 
-      }, 0
+    }, 0
     );
   }
 
@@ -198,10 +217,10 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
     const boxSize: number = .9;
     let lineOfBoxes: THREE.Mesh[];
 
-    for(let i=0; i<rows; i++) {
+    for (let i = 0; i < rows; i++) {
       lineOfBoxes = this.threeJsFactoryService.createLine(
-        'box', 
-        columns, 
+        'box',
+        columns,
         i,
         new THREE.Vector3(boxSize, boxSize, boxSize),
         new THREE.Vector3(0, 0, gap)
@@ -218,7 +237,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges{
   private updateMaterials(mapConfig: MapConfig): void {
     this.allBoxes.forEach((row, y) => {
       row.forEach((box, x) => {
-        (box.material as THREE.MeshStandardMaterial | any).color?.set( mapConfig.cells[y][x] === 1 ? 0x00FF00 : 0xFF0000);
+        (box.material as THREE.MeshStandardMaterial | any).color?.set(mapConfig.cells[y][x] === 1 ? 0x00FF00 : 0xFF0000);
       });
     });
   }

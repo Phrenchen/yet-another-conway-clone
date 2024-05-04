@@ -34,7 +34,7 @@ export class GamePageComponent {
   }
 
   public createRandomMap(): void {
-    this.isPlaying = false;
+    this.isPlaying = true;
     this.mapStartConfig = this.cgol.createMap(this.tileCountX, this.tileCountY, 'random');
   }
 

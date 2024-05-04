@@ -151,7 +151,7 @@ export class ThreejsFactoryService {
       case false:
       default: 
         return new THREE.MeshStandardMaterial({
-          color: 0xFF0000
+          color: 0x00FF0066
         });
     }
   }

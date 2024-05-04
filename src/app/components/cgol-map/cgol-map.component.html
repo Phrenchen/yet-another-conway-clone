@@ -1,7 +1,6 @@
-<div class="map-container" >
-<!--  [ngClass]="{'full-width-map': useAvailableSpace}" style="width: unset"-->
-<!--          [ngStyle]="[{'width': useAvailableSpace ? 'unset' : '100%'}]" -->
-  <canvas #game (click)="mapClicked($event)"
-          [ngClass]="{'full-width-map': !useAvailableSpace}"
-  ></canvas>
+<div class="map-container">
+  <!--  [ngClass]="{'full-width-map': useAvailableSpace}" style="width: unset"-->
+  <!--          [ngStyle]="[{'width': useAvailableSpace ? 'unset' : '100%'}]" -->
+  <canvas #game (click)="mapClicked($event)" [ngClass]="{'full-width-map': !useAvailableSpace}"></canvas>
+
 </div>
