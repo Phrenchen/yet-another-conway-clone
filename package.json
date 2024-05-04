@@ -19,6 +19,7 @@
     "@angular/platform-browser": "^15.1.0",
     "@angular/platform-browser-dynamic": "^15.1.0",
     "@angular/router": "^15.1.0",
+  
     "rxjs": "~7.8.0",
     "three": "^0.162.0",
     "tslib": "^2.3.0",
@@ -29,6 +30,7 @@
     "@angular-devkit/build-angular": "^15.1.5",
     "@angular/cli": "~15.1.5",
     "@angular/compiler-cli": "^15.1.0",
+    "@types/web-bluetooth": "^0.0.20",
     "@types/jasmine": "~4.3.0",
     "@types/three": "^0.162.0",
     "@types/uuid": "^9.0.2",
