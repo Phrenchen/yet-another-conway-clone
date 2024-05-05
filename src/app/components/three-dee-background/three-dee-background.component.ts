@@ -20,6 +20,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
 
   @Input() mapConfig!: MapConfig;
   @Input() isPlaying: boolean = true;
+  @Input() generationDuration: number = 5000;
 
   private sceneConfig!: SceneConfig;
   private allBoxes: Array<THREE.Mesh[]> = [];
@@ -28,6 +29,8 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
 
   private isPointerDown: boolean = true;
   private objectUnderPointer?: THREE.Intersection;
+  private activeCell?: THREE.Intersection;
+  private activeCellCoordinates: number[] = [];
 
   private beavers: THREE.Mesh[] = [];
 
@@ -75,10 +78,13 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
 
   private createObjects(): void {
     this.beavers = new Array(1).fill(0).map(() => {
-      const beaver = this.threeJsFactoryService.createBeaver();
-      beaver.position.setX(this.mathHelper.getRandomInt(0, 10) + .5);
-      beaver.position.setY(this.mathHelper.getRandomInt(1, 1));
-      beaver.position.setZ(this.mathHelper.getRandomInt(0, 10) + .5);
+      const beaver = this.threeJsFactoryService.createBeaver(new THREE.Vector3(2, 3, 2));
+      // beaver.position.setX(this.mathHelper.getRandomInt(0, 10) + .5);
+      // beaver.position.setY(this.mathHelper.getRandomInt(1, 1));
+      // beaver.position.setZ(this.mathHelper.getRandomInt(0, 10) + .5);
+      beaver.position.setX(-1.5);
+      beaver.position.setY(0);
+      beaver.position.setZ(-1.5);
       this.sceneConfig.scene.add(beaver);
       return beaver;
     });
@@ -101,41 +107,66 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
     // });
   }
 
+  // TODO: more than 2 states?
+  private getCellState(objectName: string): boolean {
+    // console.log('tilename', tileName);
+    if (objectName && objectName.length > 0) {
+      // selectable-0,1
+      // const coordinateStr = tileName.split('selectable-')[1]?.split(',');
+      const parts = objectName.split('selectable-');
+
+      // find config for the selected tile at position
+      this.activeCellCoordinates = parts[1]
+        .split(',')
+        .map(coordinate => {
+          return parseInt(coordinate);
+        });
+
+      return this.mapConfig.cells[this.activeCellCoordinates[0]][this.activeCellCoordinates[1]] == 1;
+    }
+    return false;
+  }
+
   private detectObjectSelection(): void {
     // detect objects under pointer
     const newObjectsUnderPointer: THREE.Intersection[] = this.threeJsSceneService.getObjectsUnderPointer(this.sceneConfig.scene, this.sceneConfig.camera, this.allBoxes);
-    let newObjectUnderPointer: THREE.Intersection | undefined = undefined;
-    const lastObjectUnderPointer: THREE.Intersection | undefined = this.objectUnderPointer;
 
     if (newObjectsUnderPointer.length > 0) {
       // this.objectUnderPointer = newObjectsUnderPointer[0];
-      newObjectUnderPointer = newObjectsUnderPointer[0];
-      this.objectUnderPointer = newObjectUnderPointer;
+      if(newObjectsUnderPointer[0] !== this.objectUnderPointer) {
+        if (this.objectUnderPointer) {
+          const isAlive = this.getCellState(this.objectUnderPointer.object.name);
+          (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(isAlive ? 0x00ff00 : 0xff0000);
+        }
+      }
 
-      (newObjectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0xffffff);
+      this.objectUnderPointer = newObjectsUnderPointer[0];
+
+      // (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0xffffff);
       // console.log('new object under pointer', newObjectUnderPointer);
-    }
-
-
-
-    if (lastObjectUnderPointer && lastObjectUnderPointer !== newObjectUnderPointer
-      // && (this.threeJsSceneService.mouse.x != this.threeJsSceneService.lastMouse.x || 
-      // this.threeJsSceneService.mouse.y != this.threeJsSceneService.lastMouse.y)
-    ) {
-      const tileName: string | undefined = this.objectUnderPointer?.object.name || undefined;
-
-      // console.log('tilename', tileName);
-      if (tileName && tileName.length > 0) {
-        // selectable-0,1
-        // const coordinateStr = tileName.split('selectable-')[1]?.split(',');
-        const parts = tileName.split('selectable-');
-        // console.log('tilename', tileName, parts);
-
-        // highlight pointer-over
-        (this.objectUnderPointer?.object as THREE.Mesh | any)?.material.color?.set(0xff9999);
-        this.objectUnderPointer = newObjectUnderPointer;
+    } else {
+      // no object under pointer:
+      // remove highlight from last object
+      if(this.objectUnderPointer) {
+        const isAlive = this.getCellState(this.objectUnderPointer.object.name);
+        (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(isAlive ? 0x00ff00 : 0xff0000);
+        this.objectUnderPointer = undefined;
       }
     }
+
+    if (!this.objectUnderPointer) {
+      return;
+    }
+
+    const isAliveNew = this.getCellState(this.objectUnderPointer.object.name);
+    // console.log('tilename', this.activeCellCoordinates, isAliveNew);
+     // highlight pointer-over
+    (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0x0000ff);
+
+
+    // if(lastObjectUnderPointer && lastObjectUnderPointer !== this.objectUnderPointer) {
+    //   (lastObjectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0xcccccc);
+    // }
   }
 
   private initEvents(): void {
@@ -163,9 +194,10 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
 
   private activateCurrentCell(): void {
     if (this.objectUnderPointer) {
-      
-      (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0x0000ff);
-      console.log('activate!°!', (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color);
+
+      // (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0x0000ff);
+      this.activeCell = this.objectUnderPointer;
+      console.log('activate!°!', (this.activeCell.object as THREE.Mesh | any)?.material.color);
     }
   }
 
@@ -187,10 +219,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
     setTimeout(() => {
       this.createBoxes();
 
-      // TODO: @Input tickDuration
-      const tickDuration = 100; // 1000 == 1fps / second
-
-      this.cgol.playGame(this.mapConfig, tickDuration)
+      this.cgol.playGame(this.mapConfig, this.generationDuration)
         .pipe(
           filter(() => this.isPlaying),
           takeUntil(this.destroy$$),
@@ -203,10 +232,9 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
         });
 
 
-      this.updateMaterials(this.mapConfig);
+      // this.updateMaterials(this.mapConfig);
 
-    }, 0
-    );
+    }, 0);
   }
 
   private createBoxes(): void {
@@ -235,6 +263,8 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
   }
 
   private updateMaterials(mapConfig: MapConfig): void {
+    console.log('update materials oh nooooooooes');
+    
     this.allBoxes.forEach((row, y) => {
       row.forEach((box, x) => {
         (box.material as THREE.MeshStandardMaterial | any).color?.set(mapConfig.cells[y][x] === 1 ? 0x00FF00 : 0xFF0000);

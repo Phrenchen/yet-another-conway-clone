@@ -6,6 +6,11 @@ body {
   margin: 0;
   // overflow-x: hidden;
   background-image: url('./assets/business-beaver.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  width: 100vw;
+  height: 100vh;
 }
 
 

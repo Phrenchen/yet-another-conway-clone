@@ -40,8 +40,9 @@ export class ThreejsFactoryService {
       }
 
       // construct name i.e. 'selectable: x,y' -> '0,0', '1,0',...
-      box.name = 'selectable-' + boxes.length + ',' + row;
-
+      box.name = 'selectable-' + row + ',' + boxes.length;
+      // console.log('position', position);
+      
       box.position.x = position.x * boxes.length;
       box.position.y = position.y * boxes.length;
       box.position.z = position.z * boxes.length;
@@ -56,8 +57,8 @@ export class ThreejsFactoryService {
     return boxes;
   }
 
-  public createBeaver(): THREE.Mesh {
-    const floor = this.createBox(new THREE.Vector3(1, 2, 1));
+  public createBeaver(size: THREE.Vector3 = new THREE.Vector3(1, 1, 1)): THREE.Mesh {
+    const floor = this.createBox(size);
     floor.material = this.createBoxMaterial(['./assets/happy-beaver.png']);
 
     return floor;
@@ -108,7 +109,8 @@ export class ThreejsFactoryService {
     return imageUrls.map(url => {
       return  new THREE.MeshBasicMaterial({
           map: new THREE.TextureLoader().load(url),
-          // side: THREE.DoubleSide
+          transparent: true,
+          side: THREE.DoubleSide
         });
       });
   }

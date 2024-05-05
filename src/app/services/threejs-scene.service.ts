@@ -95,7 +95,7 @@ export class ThreejsSceneService {
     // scene.add(this.threeFactory.createFloor());
     
     const gridHelper = new THREE.GridHelper(100, 100);
-    // scene.add(gridHelper);
+    scene.add(gridHelper);
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.position.setX(0);
