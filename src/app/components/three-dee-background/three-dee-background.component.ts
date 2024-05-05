@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { Subject, filter, fromEvent, takeUntil } from 'rxjs';
 import { MapConfig } from 'src/app/interfaces/map-config';
 import { SceneConfig } from 'src/app/interfaces/scene-config';
@@ -21,6 +21,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
   @Input() mapConfig!: MapConfig;
   @Input() isPlaying: boolean = true;
   @Input() generationDuration: number = 5000;
+  @Output() selectedCell: EventEmitter<number[]> = new EventEmitter<number[]>();
 
   private sceneConfig!: SceneConfig;
   private allBoxes: Array<THREE.Mesh[]> = [];
@@ -113,18 +114,26 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
     if (objectName && objectName.length > 0) {
       // selectable-0,1
       // const coordinateStr = tileName.split('selectable-')[1]?.split(',');
-      const parts = objectName.split('selectable-');
+      // const parts = objectName.split('selectable-');
 
       // find config for the selected tile at position
-      this.activeCellCoordinates = parts[1]
-        .split(',')
-        .map(coordinate => {
-          return parseInt(coordinate);
-        });
+      this.activeCellCoordinates = this.getCellCoordinates(objectName);
 
       return this.mapConfig.cells[this.activeCellCoordinates[0]][this.activeCellCoordinates[1]] == 1;
     }
     return false;
+  }
+
+  // TODO: refactor to use THREE.Vector2 ?
+  private getCellCoordinates(objectName: string): number[] {
+    const parts = objectName.split('selectable-');
+
+    // find config for the selected tile at position
+    return parts[1]
+      .split(',')
+      .map(coordinate => {
+        return parseInt(coordinate);
+      });
   }
 
   private detectObjectSelection(): void {
@@ -133,7 +142,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
 
     if (newObjectsUnderPointer.length > 0) {
       // this.objectUnderPointer = newObjectsUnderPointer[0];
-      if(newObjectsUnderPointer[0] !== this.objectUnderPointer) {
+      if (newObjectsUnderPointer[0] !== this.objectUnderPointer) {
         if (this.objectUnderPointer) {
           const isAlive = this.getCellState(this.objectUnderPointer.object.name);
           (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(isAlive ? 0x00ff00 : 0xff0000);
@@ -147,7 +156,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
     } else {
       // no object under pointer:
       // remove highlight from last object
-      if(this.objectUnderPointer) {
+      if (this.objectUnderPointer) {
         const isAlive = this.getCellState(this.objectUnderPointer.object.name);
         (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(isAlive ? 0x00ff00 : 0xff0000);
         this.objectUnderPointer = undefined;
@@ -160,7 +169,7 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
 
     const isAliveNew = this.getCellState(this.objectUnderPointer.object.name);
     // console.log('tilename', this.activeCellCoordinates, isAliveNew);
-     // highlight pointer-over
+    // highlight pointer-over
     (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0x0000ff);
 
 
@@ -197,7 +206,9 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
 
       // (this.objectUnderPointer.object as THREE.Mesh | any)?.material.color?.set(0x0000ff);
       this.activeCell = this.objectUnderPointer;
-      console.log('activate!°!', (this.activeCell.object as THREE.Mesh | any)?.material.color);
+      console.log('activate!°!', this.activeCell.object.name, this.getCellCoordinates(this.activeCell.object.name));
+      
+      this.selectedCell.emit(this.getCellCoordinates(this.activeCell.object.name));
     }
   }
 
@@ -263,8 +274,6 @@ export class ThreeDeeBackgroundComponent implements OnInit, OnChanges {
   }
 
   private updateMaterials(mapConfig: MapConfig): void {
-    console.log('update materials oh nooooooooes');
-    
     this.allBoxes.forEach((row, y) => {
       row.forEach((box, x) => {
         (box.material as THREE.MeshStandardMaterial | any).color?.set(mapConfig.cells[y][x] === 1 ? 0x00FF00 : 0xFF0000);

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, TRANSLATIONS_FORMAT, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { CgolWorkerMessage } from 'src/app/interfaces/cgol-worker-message';
 import { MapConfig } from 'src/app/interfaces/map-config';
@@ -10,6 +10,9 @@ import { CgolService } from 'src/app/services/cgol.service';
   styleUrls: ['./game-page.component.scss']
 })
 export class GamePageComponent {
+
+  @ViewChild('popover') popover!: ElementRef;
+  @ViewChild('dialog') dialog!: ElementRef;
 
   public workerMessage?: CgolWorkerMessage;
   public livingCellCount = 0;
@@ -28,6 +31,17 @@ export class GamePageComponent {
 
   constructor(private cgol: CgolService) {}
 
+
+  public selectedCell(coordinates: number[]): void {
+    console.log('selectdddddd', coordinates, this.popover);
+    this.popover.nativeElement.togglePopover();
+    // this.dialog?.nativeElement.showModal();
+  }
+
+  public togglePopover(): void {
+    console.log('toggli', this.popover);
+    
+  }
 
   public togglePlayPause(): void {
     this.isPlaying = !this.isPlaying;

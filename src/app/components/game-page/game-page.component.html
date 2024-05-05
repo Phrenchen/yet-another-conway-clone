@@ -1,4 +1,8 @@
-<app-three-dee-background [mapConfig]="mapStartConfig" [isPlaying]="isPlaying"></app-three-dee-background>
+<app-three-dee-background 
+[mapConfig]="mapStartConfig" 
+[isPlaying]="isPlaying"
+(selectedCell)="selectedCell($event)"
+    ></app-three-dee-background>
 
 <div class="overlay">
 
@@ -30,14 +34,20 @@
             <button class="btn-cta" (click)="togglePlayPause()">
                 {{ isPlaying ? 'Pause' : 'Play'}}
             </button>
-            
+
             <div>
-                <button popovertarget="mypopover">
+                <button 
+                 popovertarget="mypopover" 
+                 (click)="togglePopover()">
                     Toggle the popover
                 </button>
-                <div id="mypopover" popover style="padding: 0;">
+                <div #popover id="mypopover" popover style="padding: 0;">
                     <app-cell-state-selection></app-cell-state-selection>
                 </div>
+
+                <dialog #dialog id="mydialog" style="padding: 0;">
+                    <app-cell-state-selection></app-cell-state-selection>
+                </dialog>
             </div>
         </div>
 
